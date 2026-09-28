@@ -8,9 +8,11 @@ This is a personal project. It is not affiliated with or endorsed by Shenzhen Ro
 
 - A two-dimensional rigid-body world with collision handling
 - Swerve drivetrain, module and gyro simulation
+- An optional self-controlled swerve layer with module control and pose estimation
 - Motor-controller, mechanism and battery simulation
 - Intakes, projectiles and field game pieces
 - Scoring and match-state support
+- An empty Evergreen arena with optional wall segments
 - The 2026 REBUILT arena, hubs, outposts and fuel
 
 ## Usage

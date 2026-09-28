@@ -5,15 +5,15 @@
 - Physics bodies, fixtures, shapes and world management
 - Arena ownership, timing, scoring and game-piece lifecycle
 - Swerve drivetrain, module and gyro simulation
+- Optional self-controlled swerve module control and pose estimation
 - Motor, battery and motor-controller simulation
 - Intake and projectile simulation
 - Field mirroring and math utilities
+- Evergreen arena with optional wall segments
 - 2026 REBUILT arena, fuel, hub and outpost behavior
 
 ## Not yet ported
 
-- `SelfControlledSwerveDriveSimulation`
-- `ArenaEvergreen`
 - The 2024 CRESCENDO season package
 - The 2025 REEFSCAPE season package
 - `LegacyFieldMirroringUtils2024`
@@ -31,6 +31,9 @@
 - Removed game pieces remain alive until the end of the physics sub-tick so duplicate Box2D contact callbacks cannot access freed memory.
 - Arena collections own drivetrains, intakes, game pieces and custom simulations because C++ does not have Java garbage collection.
 - Random sources can be seeded for deterministic scenarios.
+- `ArenaEvergreen(true)` adds wall segments and `ArenaEvergreen(false)` leaves the field empty; the pinned Java constructor applies the flag backwards.
+- Self-controlled swerve odometry timestamps progress from the oldest cached sub-tick to the newest.
+- The default self-controlled steer PID enables continuous input over `[-pi, pi]` during construction.
 
 ## Physics-engine differences
 
