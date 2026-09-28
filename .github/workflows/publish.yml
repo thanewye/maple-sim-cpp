@@ -163,7 +163,6 @@ jobs:
           else
             git worktree add --detach "$pages_source"
             git -C "$pages_source" switch --orphan gh-pages
-            git -C "$pages_source" rm -rf .
           fi
 
           group_path="${PUBLISH_GROUP//./\/}"
