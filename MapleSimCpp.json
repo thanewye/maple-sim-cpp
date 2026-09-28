@@ -1,0 +1,32 @@
+{
+    "fileName": "MapleSimCpp.json",
+    "name": "MapleSim C++",
+    "version": "${version}",
+    "frcYear": "2026",
+    "uuid": "e75e8e93-67a2-43bc-bdc2-ae698838c569",
+    "mavenUrls": [
+        "${mavenUrl}"
+    ],
+    "jsonUrl": "${jsonUrl}",
+    "javaDependencies": [],
+    "jniDependencies": [],
+    "cppDependencies": [
+        {
+            "groupId": "${groupId}",
+            "artifactId": "${artifactId}-cpp",
+            "version": "${version}",
+            "libName": "MapleSimCpp",
+            "headerClassifier": "headers",
+            "sharedLibrary": false,
+            "skipInvalidPlatforms": true,
+            "binaryPlatforms": [
+                "windowsx86-64",
+                "linuxarm64",
+                "linuxx86-64",
+                "linuxathena",
+                "linuxarm32",
+                "osxuniversal"
+            ]
+        }
+    ]
+}

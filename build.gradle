@@ -1,0 +1,61 @@
+plugins {
+    id 'cpp'
+    id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
+    id 'edu.wpi.first.NativeUtils' version '2026.0.1'
+    id 'edu.wpi.first.GradleVsCode' version '2.1.0'
+}
+
+ext.wpilibVersion = '2026.2.1'
+
+repositories {
+    mavenCentral()
+}
+
+if (project.hasProperty('releaseMode')) {
+    wpilibRepositories.addAllReleaseRepositories(project)
+} else {
+    wpilibRepositories.addAllDevelopmentRepositories(project)
+}
+
+apply from: 'config.gradle'
+
+nativeUtils {
+    exportsConfigs {
+        MapleSimCpp {
+        }
+    }
+}
+
+model {
+    components {
+        MapleSimCpp(NativeLibrarySpec) {
+            sources.cpp {
+                source {
+                    srcDir 'src/main/native/cpp'
+                    include 'maplesim/**/*.cpp'
+                }
+                source {
+                    srcDir 'third_party/box2d/src'
+                    include '**/*.cpp'
+                }
+                exportedHeaders {
+                    srcDir 'src/main/native/include'
+                    srcDir 'src/main/native/cpp'
+                    srcDir 'third_party/box2d/include'
+                }
+            }
+
+            binaries.all {
+                cppCompiler.args '-std=c++20'
+            }
+
+            nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+        }
+    }
+}
+
+apply from: 'publish.gradle'
+
+wrapper {
+    gradleVersion = '8.14.3'
+}
