@@ -6,6 +6,7 @@ plugins {
 }
 
 ext.wpilibVersion = '2026.2.1'
+def supportsPrecompiledHeaders = !System.getProperty('os.name').startsWith('Mac')
 
 repositories {
     mavenCentral()
@@ -30,6 +31,9 @@ model {
     components {
         MapleSimCpp(NativeLibrarySpec) {
             sources.cpp {
+                if (supportsPrecompiledHeaders) {
+                    preCompiledHeader 'pch.h'
+                }
                 source {
                     srcDir 'src/main/native/cpp'
                     include 'maplesim/**/*.cpp'
