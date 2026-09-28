@@ -6,7 +6,9 @@ plugins {
 }
 
 ext.wpilibVersion = '2026.2.1'
-def supportsPrecompiledHeaders = !System.getProperty('os.name').startsWith('Mac')
+def supportsPrecompiledHeaders =
+    !System.getProperty('os.name').startsWith('Mac') &&
+    !System.getProperty('os.name').startsWith('Windows')
 
 repositories {
     mavenCentral()
