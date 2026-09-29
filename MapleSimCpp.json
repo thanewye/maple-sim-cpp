@@ -1,7 +1,7 @@
 {
     "fileName": "MapleSimCpp.json",
     "name": "MapleSim C++",
-    "version": "0.1.0-alpha",
+    "version": "0.1.1-alpha",
     "frcYear": "2026",
     "uuid": "e75e8e93-67a2-43bc-bdc2-ae698838c569",
     "mavenUrls": [
@@ -14,7 +14,7 @@
         {
             "groupId": "com.ethanye.maplesim",
             "artifactId": "maple-sim-cpp",
-            "version": "0.1.0-alpha",
+            "version": "0.1.1-alpha",
             "libName": "MapleSimCpp",
             "headerClassifier": "headers",
             "sharedLibrary": false,
