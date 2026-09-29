@@ -17,6 +17,11 @@ namespace maplesim::simulation::drivesims {
             static std::mt19937_64 random{std::random_device{}()};
             return std::uniform_real_distribution<double>{0.0, 1.0}(random);
         }
+
+        [[nodiscard]] double SanitizeDriveWheelOdometryScale(double requestedScale) {
+            if (!std::isfinite(requestedScale) || requestedScale <= 0.0) return 1.0;
+            return requestedScale;
+        }
     } // namespace
 
     SwerveModuleSimulation::SwerveModuleSimulation(configs::SwerveModuleSimulationConfig config)
@@ -40,11 +45,19 @@ namespace maplesim::simulation::drivesims {
 
     physics::Force2d SwerveModuleSimulation::UpdateSimulationSubTickGetModuleForce(const physics::LinearVelocity2d& moduleCurrentGroundVelocityWorldRelative,
                                                                                    const frc::Rotation2d& robotFacing, units::newton_t gravityForceOnModule) {
+        return UpdateSimulationSubTickGetModuleForce(moduleCurrentGroundVelocityWorldRelative, robotFacing, gravityForceOnModule,
+                                                     driveWheelOdometryDistanceScale_);
+    }
+
+    physics::Force2d SwerveModuleSimulation::UpdateSimulationSubTickGetModuleForce(const physics::LinearVelocity2d& moduleCurrentGroundVelocityWorldRelative,
+                                                                                   const frc::Rotation2d& robotFacing, units::newton_t gravityForceOnModule,
+                                                                                   double driveWheelOdometryDistanceScale) {
+        driveWheelOdometryDistanceScale_ = SanitizeDriveWheelOdometryScale(driveWheelOdometryDistanceScale);
         steerMotorSim_.Update(SimulatedArena::GetSimulationDt());
         const units::newton_t grippingForce = config.GetGrippingForce(gravityForceOnModule);
         const frc::Rotation2d moduleWorldFacing = GetSteerAbsoluteFacing() + robotFacing;
         const physics::Force2d propellingForce = GetPropellingForce(grippingForce, moduleWorldFacing, moduleCurrentGroundVelocityWorldRelative);
-        UpdateEncoderCaches();
+        UpdateEncoderCaches(driveWheelOdometryDistanceScale_);
         return propellingForce;
     }
 
@@ -91,12 +104,16 @@ namespace maplesim::simulation::drivesims {
         return frc::SwerveModuleState{units::meters_per_second_t{freeSpinWheelSpeed.value() * config.wheelRadius.value()}, GetSteerAbsoluteFacing()};
     }
 
-    void SwerveModuleSimulation::UpdateEncoderCaches() {
-        driveWheelFinalPosition_ = driveWheelFinalPosition_ + driveWheelFinalSpeed_ * SimulatedArena::GetSimulationDt();
+    void SwerveModuleSimulation::UpdateEncoderCaches(double driveWheelDistanceScale) {
+        driveWheelFinalPosition_ = driveWheelFinalPosition_ + driveWheelFinalSpeed_ * SimulatedArena::GetSimulationDt() * driveWheelDistanceScale;
         steerAbsolutePositionCache_.pop_front();
         steerAbsolutePositionCache_.push_back(GetSteerAbsoluteFacing());
         driveWheelFinalPositionCache_.pop_front();
         driveWheelFinalPositionCache_.push_back(driveWheelFinalPosition_);
+    }
+
+    void SwerveModuleSimulation::SetDriveWheelOdometryDistanceScale(double driveWheelOdometryDistanceScale) {
+        driveWheelOdometryDistanceScale_ = SanitizeDriveWheelOdometryScale(driveWheelOdometryDistanceScale);
     }
 
     units::ampere_t SwerveModuleSimulation::GetDriveMotorSupplyCurrent() const {

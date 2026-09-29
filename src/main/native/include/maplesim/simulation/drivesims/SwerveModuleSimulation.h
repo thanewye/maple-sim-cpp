@@ -53,8 +53,15 @@ namespace maplesim::simulation::drivesims {
         /** Advances the steer motor, returns the world-relative force the wheel exerts on the chassis, and records encoder readings. */
         physics::Force2d UpdateSimulationSubTickGetModuleForce(const physics::LinearVelocity2d& moduleCurrentGroundVelocityWorldRelative,
                                                                const frc::Rotation2d& robotFacing, units::newton_t gravityForceOnModule);
+        /** As above, scaling the distance the drive wheel reports to odometry by driveWheelOdometryDistanceScale. */
+        physics::Force2d UpdateSimulationSubTickGetModuleForce(const physics::LinearVelocity2d& moduleCurrentGroundVelocityWorldRelative,
+                                                               const frc::Rotation2d& robotFacing, units::newton_t gravityForceOnModule,
+                                                               double driveWheelOdometryDistanceScale);
 
         [[nodiscard]] frc::SwerveModuleState GetCurrentState() const;
+
+        void SetDriveWheelOdometryDistanceScale(double driveWheelOdometryDistanceScale);
+        [[nodiscard]] double GetDriveWheelOdometryDistanceScale() const { return driveWheelOdometryDistanceScale_; }
 
         [[nodiscard]] units::volt_t GetDriveMotorAppliedVoltage() const { return driveMotorAppliedVoltage_; }
         [[nodiscard]] units::volt_t GetSteerMotorAppliedVoltage() const { return steerMotorSim_.GetAppliedVoltage(); }
@@ -91,13 +98,14 @@ namespace maplesim::simulation::drivesims {
         [[nodiscard]] physics::Force2d GetPropellingForce(units::newton_t grippingForce, const frc::Rotation2d& moduleWorldFacing,
                                                           const physics::LinearVelocity2d& moduleCurrentGroundVelocity);
         [[nodiscard]] units::newton_meter_t GetDriveWheelTorque();
-        void UpdateEncoderCaches();
+        void UpdateEncoderCaches(double driveWheelDistanceScale);
 
         motorsims::MapleMotorSim steerMotorSim_;
         units::volt_t driveMotorAppliedVoltage_{0.0};
         units::ampere_t driveMotorStatorCurrent_{0.0};
         units::radian_t driveWheelFinalPosition_{0.0};
         units::radians_per_second_t driveWheelFinalSpeed_{0.0};
+        double driveWheelOdometryDistanceScale_ = 1.0;
         std::unique_ptr<motorsims::SimulatedMotorController> driveMotorController_;
         const units::radian_t steerRelativeEncoderOffSet_;
         std::deque<units::radian_t> driveWheelFinalPositionCache_;
