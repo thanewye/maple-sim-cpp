@@ -7,6 +7,11 @@ on:
         description: Version to publish, such as 0.1.0
         required: true
         type: string
+      replace_existing:
+        description: Replace an existing version with corrected artifacts
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: github-pages
@@ -15,6 +20,7 @@ concurrency:
 env:
   PUBLISH_VERSION: ${{ inputs.version }}
   PUBLISH_GROUP: com.ethanye.maplesim
+  REPLACE_EXISTING: ${{ inputs.replace_existing }}
   ORG_GRADLE_PROJECT_publishVersion: ${{ inputs.version }}
   ORG_GRADLE_PROJECT_publishGroup: com.ethanye.maplesim
   ORG_GRADLE_PROJECT_vendordepMavenUrl: https://thanewye.github.io/maple-sim-cpp/maven
@@ -176,7 +182,7 @@ jobs:
 
           group_path="${PUBLISH_GROUP//./\/}"
           version_path="$pages_source/maven/$group_path/maple-sim-cpp/$PUBLISH_VERSION"
-          if [[ -e "$version_path" ]]; then
+          if [[ -e "$version_path" && "$REPLACE_EXISTING" != "true" ]]; then
             echo "Version $PUBLISH_VERSION is already published." >&2
             exit 1
           fi

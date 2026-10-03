@@ -1,5 +1,6 @@
 #include <cmath>
 #include <memory>
+#include <numbers>
 
 #include <wpi/hal/DriverStationTypes.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
@@ -92,6 +93,31 @@ namespace {
         EXPECT_NEAR(maplesim::utils::mathutils::SwerveStateProjection::Project(optimized, facing).value(), -2.0, 1e-9);
     }
 
+    TEST_F(MigrationTest, SteeringEncodersAndCachesPreserveContinuousTurns) {
+        const auto config = drivesims::configs::DriveTrainSimulationConfig::Default();
+        auto module = config.swerveModuleSimulationFactories[0]();
+        const auto initialAngle = module->GetSteerAbsoluteAngle();
+        const auto offset = module->GetSteerRelativeEncoderPosition() - initialAngle * module->config.steerGearRatio;
+        auto& controller = module->UseGenericControllerForSteer();
+        for (double voltage : {3.0, -3.0}) {
+            controller.RequestVoltage(units::volt_t{voltage});
+            for (int tick = 0; tick < 500; ++tick) {
+                (void)module->UpdateSimulationSubTickGetModuleForce({}, {}, units::newton_t{100});
+                const auto angle = module->GetSteerAbsoluteAngle();
+                EXPECT_NEAR(module->GetSteerRelativeEncoderPosition().value(), (angle * module->config.steerGearRatio + offset).value(), 1e-9);
+                const auto relative = module->GetCachedSteerRelativeEncoderPositions();
+                const auto absolute = module->GetCachedSteerAbsolutePositions();
+                ASSERT_EQ(relative.size(), absolute.size());
+                EXPECT_NEAR(relative.back().value(), module->GetSteerRelativeEncoderPosition().value(), 1e-9);
+                for (size_t index = 0; index < relative.size(); ++index) {
+                    const wpi::math::Rotation2d facing{(relative[index] - offset) / module->config.steerGearRatio};
+                    EXPECT_NEAR((facing - absolute[index]).Radians().value(), 0.0, 1e-9);
+                }
+            }
+            if (voltage > 0) EXPECT_GT((module->GetSteerAbsoluteAngle() - initialAngle).value(), 2.0 * std::numbers::pi);
+        }
+    }
+
     TEST_F(MigrationTest, AllianceMirroringUsesMatchState) {
         const wpi::math::Translation2d translation{units::meter_t{2}, units::meter_t{3}};
         wpi::sim::DriverStationSim::SetAllianceStationId(wpi::hal::AllianceStationID::BLUE_1);
@@ -161,4 +187,4 @@ namespace {
             arena.SimulationPeriodic();
         EXPECT_FALSE(arena.GetGamePiecesPosesByType("Fuel").empty());
     }
-}
+} // namespace

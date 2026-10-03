@@ -111,7 +111,7 @@ namespace maplesim::simulation::drivesims {
         std::unique_ptr<motorsims::SimulatedMotorController> driveMotorController_;
         const wpi::units::radian_t steerRelativeEncoderOffSet_;
         std::deque<wpi::units::radian_t> driveWheelFinalPositionCache_;
-        std::deque<wpi::math::Rotation2d> steerAbsolutePositionCache_;
+        std::deque<wpi::units::radian_t> steerAbsoluteAngleCache_;
         motorsims::SimulatedBattery::ApplianceConnection driveMotorBatteryConnection_;
     };
 } // namespace maplesim::simulation::drivesims

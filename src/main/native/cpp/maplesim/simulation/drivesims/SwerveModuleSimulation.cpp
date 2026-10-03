@@ -30,7 +30,7 @@ namespace maplesim::simulation::drivesims {
         , driveMotorController_(std::make_unique<motorsims::SimulatedMotorController::GenericMotorController>(this->config.driveMotorConfigs.motor))
         , steerRelativeEncoderOffSet_((NextRandomDouble() - 0.5) * 30)
         , driveWheelFinalPositionCache_(SimulatedArena::GetSimulationSubTicksIn1Period(), driveWheelFinalPosition_)
-        , steerAbsolutePositionCache_(SimulatedArena::GetSimulationSubTicksIn1Period(), GetSteerAbsoluteFacing())
+        , steerAbsoluteAngleCache_(SimulatedArena::GetSimulationSubTicksIn1Period(), GetSteerAbsoluteAngle())
         , driveMotorBatteryConnection_(motorsims::SimulatedBattery::AddElectricalAppliances([this] { return GetDriveMotorSupplyCurrent(); })) {
         steerMotorSim_.UseSimpleDCMotorController();
     }
@@ -110,8 +110,8 @@ namespace maplesim::simulation::drivesims {
 
     void SwerveModuleSimulation::UpdateEncoderCaches(double driveWheelDistanceScale) {
         driveWheelFinalPosition_ = driveWheelFinalPosition_ + driveWheelFinalSpeed_ * SimulatedArena::GetSimulationDt() * driveWheelDistanceScale;
-        steerAbsolutePositionCache_.pop_front();
-        steerAbsolutePositionCache_.push_back(GetSteerAbsoluteFacing());
+        steerAbsoluteAngleCache_.pop_front();
+        steerAbsoluteAngleCache_.push_back(GetSteerAbsoluteAngle());
         driveWheelFinalPositionCache_.pop_front();
         driveWheelFinalPositionCache_.push_back(driveWheelFinalPosition_);
     }
@@ -125,7 +125,7 @@ namespace maplesim::simulation::drivesims {
     }
 
     wpi::units::radian_t SwerveModuleSimulation::GetSteerRelativeEncoderPosition() const {
-        return GetSteerAbsoluteFacing().Radians() * config.steerGearRatio + steerRelativeEncoderOffSet_;
+        return GetSteerAbsoluteAngle() * config.steerGearRatio + steerRelativeEncoderOffSet_;
     }
 
     std::vector<wpi::units::radian_t> SwerveModuleSimulation::GetCachedDriveEncoderUnGearedPositions() const {
@@ -142,13 +142,17 @@ namespace maplesim::simulation::drivesims {
 
     std::vector<wpi::units::radian_t> SwerveModuleSimulation::GetCachedSteerRelativeEncoderPositions() const {
         std::vector<wpi::units::radian_t> positions;
-        positions.reserve(steerAbsolutePositionCache_.size());
-        for (const wpi::math::Rotation2d& absoluteFacing : steerAbsolutePositionCache_)
-            positions.push_back(absoluteFacing.Radians() * config.steerGearRatio + steerRelativeEncoderOffSet_);
+        positions.reserve(steerAbsoluteAngleCache_.size());
+        for (const wpi::units::radian_t absoluteAngle : steerAbsoluteAngleCache_)
+            positions.push_back(absoluteAngle * config.steerGearRatio + steerRelativeEncoderOffSet_);
         return positions;
     }
 
     std::vector<wpi::math::Rotation2d> SwerveModuleSimulation::GetCachedSteerAbsolutePositions() const {
-        return {steerAbsolutePositionCache_.begin(), steerAbsolutePositionCache_.end()};
+        std::vector<wpi::math::Rotation2d> positions;
+        positions.reserve(steerAbsoluteAngleCache_.size());
+        for (const wpi::units::radian_t absoluteAngle : steerAbsoluteAngleCache_)
+            positions.emplace_back(absoluteAngle);
+        return positions;
     }
 } // namespace maplesim::simulation::drivesims
