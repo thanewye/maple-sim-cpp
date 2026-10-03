@@ -17,6 +17,19 @@ This is a personal project. It is not affiliated with or endorsed by Shenzhen Ro
 
 ## Usage
 
+### Install the vendordep
+
+Choose the vendordep that matches your robot project's WPILib version:
+
+| WPILib version | Vendordep URL | Source branch |
+| --- | --- | --- |
+| 2026 | [MapleSimCpp.json](https://thanewye.github.io/maple-sim-cpp/MapleSimCpp.json) | `main` |
+| 2027.0.0-alpha-7 | [MapleSimCpp-2027.json](https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-2027.json) | `2027` |
+
+The original `MapleSimCpp.json` URL continues to serve 2026 releases. `MapleSimCpp-2027.json` tracks 2027 releases and currently provides `27.0.0-alpha-1`. Install only one of these files per robot project; they identify the same library and target different WPILib versions.
+
+In VS Code, run **WPILib: Manage Vendor Libraries → Install new libraries (online)** and paste the matching URL. To pin a release, use `https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-<version>.json`; for example, [MapleSimCpp-27.0.0-alpha-1.json](https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-27.0.0-alpha-1.json) pins the current 2027 release.
+
 ### Build and publish
 
 Use Java 25 and clone the `2027` branch with its Box2D submodule:
@@ -67,7 +80,7 @@ A robot project still needs to connect the simulated modules and gyro to its har
 ## Migrating from 2026
 
 - Install WPILib 2027 alpha 7 and use Java 25. This branch uses Gradle 9.4.1 and C++23.
-- Once published, install `https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-2027.json`. The 2026 vendordep remains at `MapleSimCpp.json`.
+- Install the 2027 vendordep from the URL above. The 2026 vendordep remains at `MapleSimCpp.json`.
 - Replace WPILib `.h` includes with the 2027 `.hpp` paths. Geometry, controllers, kinematics and motor models now use `wpi::math`; units use `wpi::units` and NetworkTables uses `wpi::nt`.
 - Public APIs now take `wpi::math::ChassisVelocities`, `wpi::math::SwerveModuleVelocity` and `wpi::Alliance`. MapleSim method names such as `RunChassisSpeeds` are retained.
 - Systemcore replaces roboRIO and Windows ARM64 replaces Linux ARM32. Linux ARM64, Linux x86-64, Windows x86-64 and macOS universal remain supported.
