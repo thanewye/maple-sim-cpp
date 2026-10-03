@@ -1,0 +1,32 @@
+{
+  "fileName": "MapleSimCpp.json",
+  "name": "MapleSim C++",
+  "version": "27.0.0-alpha-1",
+  "wpilibYear": "2027_alpha7",
+  "uuid": "e75e8e93-67a2-43bc-bdc2-ae698838c569",
+  "mavenUrls": [
+    "https://thanewye.github.io/maple-sim-cpp/maven"
+  ],
+  "jsonUrl": "https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-2027.json",
+  "javaDependencies": [],
+  "jniDependencies": [],
+  "cppDependencies": [
+    {
+      "groupId": "com.ethanye.maplesim",
+      "artifactId": "maple-sim-cpp",
+      "version": "27.0.0-alpha-1",
+      "libName": "MapleSimCpp",
+      "headerClassifier": "headers",
+      "sharedLibrary": false,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": [
+        "windowsx86-64",
+        "linuxarm64",
+        "linuxx86-64",
+        "linuxsystemcore",
+        "windowsarm64",
+        "osxuniversal"
+      ]
+    }
+  ]
+}
