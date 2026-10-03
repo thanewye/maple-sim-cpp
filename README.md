@@ -17,6 +17,19 @@ This is a personal project. It is not affiliated with or endorsed by Shenzhen Ro
 
 ## Usage
 
+### Install the vendordep
+
+Choose the vendordep that matches your robot project's WPILib version:
+
+| WPILib version | Vendordep URL | Source branch |
+| --- | --- | --- |
+| 2026 | [MapleSimCpp.json](https://thanewye.github.io/maple-sim-cpp/MapleSimCpp.json) | `main` |
+| 2027.0.0-alpha-7 | [MapleSimCpp-2027.json](https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-2027.json) | `2027` |
+
+The original `MapleSimCpp.json` URL continues to serve 2026 releases. `MapleSimCpp-2027.json` tracks 2027 releases and currently provides `27.0.0-alpha-1`. Install only one of these files per robot project; they identify the same library and target different WPILib versions.
+
+In VS Code, run **WPILib: Manage Vendor Libraries → Install new libraries (online)** and paste the matching URL. To pin a release, use `https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-<version>.json`; for example, [MapleSimCpp-27.0.0-alpha-1.json](https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-27.0.0-alpha-1.json) pins the current 2027 release.
+
 ### Build and publish
 
 Clone the repository with its Box2D submodule and run the release build:
