@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <vector>
 
-#include <frc/geometry/Pose3d.h>
-#include <frc/geometry/Translation3d.h>
-#include <networktables/StructTopic.h>
+#include <wpi/math/geometry/Pose3d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/nt/StructTopic.hpp>
 
 #include "maplesim/simulation/Goal.h"
 
@@ -18,18 +18,18 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
     public:
         static constexpr double kGoalRadius = 0.5969;
 
-        [[nodiscard]] static const std::array<frc::Pose3d, 4>& RedShootPoses();
+        [[nodiscard]] static const std::array<wpi::math::Pose3d, 4>& RedShootPoses();
         /** Test-only: reseeds the generator that picks the ejection pose so scenarios are reproducible. */
         static void SetSeed(std::uint64_t seed);
 
         RebuiltHub(Arena2026Rebuilt& arena, bool isBlue);
 
-        void Draw(std::vector<frc::Pose3d>& drawList) const override;
+        void Draw(std::vector<wpi::math::Pose3d>& drawList) const override;
 
     protected:
-        [[nodiscard]] static const frc::Translation3d& BlueHubPose();
-        [[nodiscard]] static const frc::Translation3d& RedHubPose();
-        [[nodiscard]] static const std::array<frc::Pose3d, 4>& BlueShootPoses();
+        [[nodiscard]] static const wpi::math::Translation3d& BlueHubPose();
+        [[nodiscard]] static const wpi::math::Translation3d& RedHubPose();
+        [[nodiscard]] static const std::array<wpi::math::Pose3d, 4>& BlueShootPoses();
 
         [[nodiscard]] bool CheckCollision(const gamepieces::GamePiece& gamePiece) const override;
         void AddPoints() override;
@@ -37,6 +37,6 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         Arena2026Rebuilt& rebuiltArena_;
 
     private:
-        nt::StructPublisher<frc::Pose3d> hubPosePublisher_;
+        wpi::nt::StructPublisher<wpi::math::Pose3d> hubPosePublisher_;
     };
 } // namespace maplesim::simulation::seasonspecific::rebuilt2026

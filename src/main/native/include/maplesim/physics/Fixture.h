@@ -1,8 +1,8 @@
 #pragma once
 
-#include <units/area.h>
-#include <units/mass.h>
-#include <units/velocity.h>
+#include <wpi/units/area.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "maplesim/physics/Shape.h"
 
@@ -11,13 +11,13 @@ class b2Fixture;
 namespace maplesim::physics {
     class Body;
 
-    using kilograms_per_square_meter_t = units::unit_t<units::compound_unit<units::kilograms, units::inverse<units::square_meters>>>;
+    using kilograms_per_square_meter_t = wpi::units::unit_t<wpi::units::compound_unit<wpi::units::kilograms, wpi::units::inverse<wpi::units::square_meters>>>;
 
     /** Defaults match dyn4j's BodyFixture, not Box2D's b2FixtureDef. */
     struct FixtureMaterial {
         double friction = 0.2;
         double restitution = 0.0;
-        units::meters_per_second_t restitutionThreshold{1.0};
+        wpi::units::meters_per_second_t restitutionThreshold{1.0};
         kilograms_per_square_meter_t density{1.0};
     };
 

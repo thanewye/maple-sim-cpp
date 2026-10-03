@@ -10,17 +10,17 @@
 #include <box2d/b2_math.h>
 #include <box2d/b2_polygon_shape.h>
 #include <box2d/b2_settings.h>
-#include <frc/geometry/Translation2d.h>
+#include <wpi/math/geometry/Translation2d.hpp>
 
 #include "maplesim/physics/Shape.h"
 
 namespace maplesim::physics::detail {
-    [[nodiscard]] inline b2Vec2 ToB2Vec2(const frc::Translation2d& translation) {
+    [[nodiscard]] inline b2Vec2 ToB2Vec2(const wpi::math::Translation2d& translation) {
         return b2Vec2{static_cast<float>(translation.X().value()), static_cast<float>(translation.Y().value())};
     }
 
-    [[nodiscard]] inline frc::Translation2d ToTranslation2d(const b2Vec2& vector) {
-        return frc::Translation2d{units::meter_t{vector.x}, units::meter_t{vector.y}};
+    [[nodiscard]] inline wpi::math::Translation2d ToTranslation2d(const b2Vec2& vector) {
+        return wpi::math::Translation2d{wpi::units::meter_t{vector.x}, wpi::units::meter_t{vector.y}};
     }
 
     /** Box2D's hull welds points within 4 * linearSlop, collapsing thin rectangles that dyn4j accepts, so assign them directly. */

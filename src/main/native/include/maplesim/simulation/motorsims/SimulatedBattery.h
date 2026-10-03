@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <functional>
 
-#include <units/current.h>
-#include <units/voltage.h>
+#include <wpi/units/current.hpp>
+#include <wpi/units/voltage.hpp>
 
 namespace maplesim::simulation::motorsims {
     class MapleMotorSim;
@@ -33,13 +33,13 @@ namespace maplesim::simulation::motorsims {
 
         SimulatedBattery() = delete;
 
-        [[nodiscard]] static ApplianceConnection AddElectricalAppliances(std::function<units::ampere_t()> customElectricalAppliances);
+        [[nodiscard]] static ApplianceConnection AddElectricalAppliances(std::function<wpi::units::ampere_t()> customElectricalAppliances);
         [[nodiscard]] static ApplianceConnection AddMotor(const MapleMotorSim& mapleMotorSim);
 
         static void SimulationSubTick();
 
-        [[nodiscard]] static units::volt_t GetBatteryVoltage();
-        [[nodiscard]] static units::ampere_t GetTotalCurrentDrawn();
-        [[nodiscard]] static units::volt_t Clamp(units::volt_t voltage);
+        [[nodiscard]] static wpi::units::volt_t GetBatteryVoltage();
+        [[nodiscard]] static wpi::units::ampere_t GetTotalCurrentDrawn();
+        [[nodiscard]] static wpi::units::volt_t Clamp(wpi::units::volt_t voltage);
     };
 } // namespace maplesim::simulation::motorsims

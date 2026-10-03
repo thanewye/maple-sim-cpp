@@ -5,7 +5,7 @@
 #include <cmath>
 #include <numbers>
 
-#include <units/angle.h>
+#include <wpi/units/angle.hpp>
 
 #include "maplesim/simulation/SimulatedArena.h"
 #include "maplesim/utils/mathutils/MapleCommonMath.h"
@@ -21,32 +21,32 @@ namespace maplesim::simulation::drivesims {
         , velocityMeasurementStandardDeviationPercent_(velocityMeasurementStandardDeviationPercent)
         , cachedRotations_(SimulatedArena::GetSimulationSubTicksIn1Period(), gyroReading_) {}
 
-    void GyroSimulation::SetRotation(const frc::Rotation2d& currentRotation) {
+    void GyroSimulation::SetRotation(const wpi::math::Rotation2d& currentRotation) {
         gyroReading_ = currentRotation;
     }
 
-    units::radians_per_second_t GyroSimulation::GetMeasuredAngularVelocity() const {
-        return units::radians_per_second_t{measuredAngularVelocityRadPerSec_};
+    wpi::units::radians_per_second_t GyroSimulation::GetMeasuredAngularVelocity() const {
+        return wpi::units::radians_per_second_t{measuredAngularVelocityRadPerSec_};
     }
 
-    std::vector<frc::Rotation2d> GyroSimulation::GetCachedGyroReadings() const {
+    std::vector<wpi::math::Rotation2d> GyroSimulation::GetCachedGyroReadings() const {
         return {cachedRotations_.begin(), cachedRotations_.end()};
     }
 
-    void GyroSimulation::UpdateSimulationSubTick(units::radians_per_second_t actualAngularVelocity) {
+    void GyroSimulation::UpdateSimulationSubTick(wpi::units::radians_per_second_t actualAngularVelocity) {
         const double actualAngularVelocityRadPerSec = actualAngularVelocity.value();
-        const frc::Rotation2d driftingDueToImpact = GetDriftingDueToImpact(actualAngularVelocityRadPerSec);
+        const wpi::math::Rotation2d driftingDueToImpact = GetDriftingDueToImpact(actualAngularVelocityRadPerSec);
         gyroReading_ = gyroReading_ + driftingDueToImpact;
-        const frc::Rotation2d dTheta = GetGyroDTheta(actualAngularVelocityRadPerSec);
+        const wpi::math::Rotation2d dTheta = GetGyroDTheta(actualAngularVelocityRadPerSec);
         gyroReading_ = gyroReading_ + dTheta;
-        const frc::Rotation2d noMotionDrifting = GetNoMotionDrifting();
+        const wpi::math::Rotation2d noMotionDrifting = GetNoMotionDrifting();
         gyroReading_ = gyroReading_ + noMotionDrifting;
 
         cachedRotations_.pop_front();
         cachedRotations_.push_back(gyroReading_);
     }
 
-    frc::Rotation2d GyroSimulation::GetDriftingDueToImpact(double actualAngularVelocityRadPerSec) {
+    wpi::math::Rotation2d GyroSimulation::GetDriftingDueToImpact(double actualAngularVelocityRadPerSec) {
         const double angularAccelerationRadPerSecSq =
             (actualAngularVelocityRadPerSec - previousAngularVelocityRadPerSec_) / SimulatedArena::GetSimulationDt().value();
         const double driftingDueToImpactAbsVal =
@@ -55,18 +55,18 @@ namespace maplesim::simulation::drivesims {
                 : 0;
         const double driftingDueToImpact = std::copysign(driftingDueToImpactAbsVal, -angularAccelerationRadPerSecSq);
         previousAngularVelocityRadPerSec_ = actualAngularVelocityRadPerSec;
-        return frc::Rotation2d{units::radian_t{driftingDueToImpact}};
+        return wpi::math::Rotation2d{wpi::units::radian_t{driftingDueToImpact}};
     }
 
-    frc::Rotation2d GyroSimulation::GetGyroDTheta(double actualAngularVelocityRadPerSec) {
+    wpi::math::Rotation2d GyroSimulation::GetGyroDTheta(double actualAngularVelocityRadPerSec) {
         measuredAngularVelocityRadPerSec_ = utils::mathutils::MapleCommonMath::GenerateRandomNormal(
             actualAngularVelocityRadPerSec, velocityMeasurementStandardDeviationPercent_ * std::abs(actualAngularVelocityRadPerSec));
-        return frc::Rotation2d{units::radian_t{measuredAngularVelocityRadPerSec_ * SimulatedArena::GetSimulationDt().value()}};
+        return wpi::math::Rotation2d{wpi::units::radian_t{measuredAngularVelocityRadPerSec_ * SimulatedArena::GetSimulationDt().value()}};
     }
 
-    frc::Rotation2d GyroSimulation::GetNoMotionDrifting() const {
+    wpi::math::Rotation2d GyroSimulation::GetNoMotionDrifting() const {
         const double averageDrifting1Period = averageDriftingIn30SecsMotionlessDeg_ / 30 * SimulatedArena::GetSimulationDt().value();
         const double driftingInThisPeriod = utils::mathutils::MapleCommonMath::GenerateRandomNormal(0, averageDrifting1Period);
-        return frc::Rotation2d{units::degree_t{driftingInThisPeriod}};
+        return wpi::math::Rotation2d{wpi::units::degree_t{driftingInThisPeriod}};
     }
 } // namespace maplesim::simulation::drivesims

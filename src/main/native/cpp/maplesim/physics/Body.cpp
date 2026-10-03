@@ -60,12 +60,12 @@ namespace maplesim::physics {
         std::erase_if(ownedFixtures_, [&fixture](const std::unique_ptr<Fixture>& owned) { return owned.get() == &fixture; });
     }
 
-    frc::Pose2d Body::GetPose() const {
+    wpi::math::Pose2d Body::GetPose() const {
         if (b2Body_ == nullptr) return pose_;
-        return frc::Pose2d{detail::ToTranslation2d(b2Body_->GetPosition()), frc::Rotation2d{units::radian_t{b2Body_->GetAngle()}}};
+        return wpi::math::Pose2d{detail::ToTranslation2d(b2Body_->GetPosition()), wpi::math::Rotation2d{wpi::units::radian_t{b2Body_->GetAngle()}}};
     }
 
-    void Body::SetPose(const frc::Pose2d& pose) {
+    void Body::SetPose(const wpi::math::Pose2d& pose) {
         pose_ = pose;
         if (b2Body_ != nullptr) b2Body_->SetTransform(detail::ToB2Vec2(pose.Translation()), static_cast<float>(pose.Rotation().Radians().value()));
     }
@@ -73,7 +73,7 @@ namespace maplesim::physics {
     LinearVelocity2d Body::GetLinearVelocity() const {
         if (b2Body_ == nullptr) return linearVelocity_;
         const b2Vec2& velocity = b2Body_->GetLinearVelocity();
-        return LinearVelocity2d{units::meters_per_second_t{velocity.x}, units::meters_per_second_t{velocity.y}};
+        return LinearVelocity2d{wpi::units::meters_per_second_t{velocity.x}, wpi::units::meters_per_second_t{velocity.y}};
     }
 
     void Body::SetLinearVelocity(const LinearVelocity2d& velocity) {
@@ -81,42 +81,42 @@ namespace maplesim::physics {
         if (b2Body_ != nullptr) b2Body_->SetLinearVelocity(b2Vec2{static_cast<float>(velocity.x.value()), static_cast<float>(velocity.y.value())});
     }
 
-    units::radians_per_second_t Body::GetAngularVelocity() const {
+    wpi::units::radians_per_second_t Body::GetAngularVelocity() const {
         if (b2Body_ == nullptr) return angularVelocity_;
-        return units::radians_per_second_t{b2Body_->GetAngularVelocity()};
+        return wpi::units::radians_per_second_t{b2Body_->GetAngularVelocity()};
     }
 
-    void Body::SetAngularVelocity(units::radians_per_second_t velocity) {
+    void Body::SetAngularVelocity(wpi::units::radians_per_second_t velocity) {
         angularVelocity_ = velocity;
         if (b2Body_ != nullptr) b2Body_->SetAngularVelocity(static_cast<float>(velocity.value()));
     }
 
-    frc::ChassisSpeeds Body::GetVelocity() const {
+    wpi::math::ChassisVelocities Body::GetVelocity() const {
         const LinearVelocity2d linearVelocity = GetLinearVelocity();
-        return frc::ChassisSpeeds{linearVelocity.x, linearVelocity.y, GetAngularVelocity()};
+        return wpi::math::ChassisVelocities{linearVelocity.x, linearVelocity.y, GetAngularVelocity()};
     }
 
-    void Body::SetVelocity(const frc::ChassisSpeeds& fieldRelativeVelocity) {
+    void Body::SetVelocity(const wpi::math::ChassisVelocities& fieldRelativeVelocity) {
         SetLinearVelocity(LinearVelocity2d{fieldRelativeVelocity.vx, fieldRelativeVelocity.vy});
         SetAngularVelocity(fieldRelativeVelocity.omega);
     }
 
-    frc::Translation2d Body::GetWorldCenter() const {
+    wpi::math::Translation2d Body::GetWorldCenter() const {
         if (b2Body_ != nullptr) return detail::ToTranslation2d(b2Body_->GetWorldCenter());
         return GetWorldPoint(ComputeMassProperties().localCenter);
     }
 
-    frc::Translation2d Body::GetWorldPoint(const frc::Translation2d& localPoint) const {
-        const frc::Pose2d pose = GetPose();
+    wpi::math::Translation2d Body::GetWorldPoint(const wpi::math::Translation2d& localPoint) const {
+        const wpi::math::Pose2d pose = GetPose();
         return pose.Translation() + localPoint.RotateBy(pose.Rotation());
     }
 
-    LinearVelocity2d Body::GetVelocityAtPoint(const frc::Translation2d& worldPoint) const {
-        const frc::Translation2d leverArm = worldPoint - GetWorldCenter();
+    LinearVelocity2d Body::GetVelocityAtPoint(const wpi::math::Translation2d& worldPoint) const {
+        const wpi::math::Translation2d leverArm = worldPoint - GetWorldCenter();
         const double angularVelocity = GetAngularVelocity().value();
         const LinearVelocity2d tangentialVelocity{
-            units::meters_per_second_t{-angularVelocity * leverArm.Y().value()},
-            units::meters_per_second_t{angularVelocity * leverArm.X().value()},
+            wpi::units::meters_per_second_t{-angularVelocity * leverArm.Y().value()},
+            wpi::units::meters_per_second_t{angularVelocity * leverArm.X().value()},
         };
         return GetLinearVelocity() + tangentialVelocity;
     }
@@ -125,25 +125,25 @@ namespace maplesim::physics {
         appliedForce_ += force;
     }
 
-    void Body::ApplyForce(const Force2d& force, const frc::Translation2d& worldPoint) {
-        const frc::Translation2d leverArm = worldPoint - GetWorldCenter();
+    void Body::ApplyForce(const Force2d& force, const wpi::math::Translation2d& worldPoint) {
+        const wpi::math::Translation2d leverArm = worldPoint - GetWorldCenter();
         appliedForce_ += force;
-        appliedTorque_ += units::newton_meter_t{leverArm.X().value() * force.y.value() - leverArm.Y().value() * force.x.value()};
+        appliedTorque_ += wpi::units::newton_meter_t{leverArm.X().value() * force.y.value() - leverArm.Y().value() * force.x.value()};
     }
 
-    void Body::ApplyTorque(units::newton_meter_t torque) {
+    void Body::ApplyTorque(wpi::units::newton_meter_t torque) {
         appliedTorque_ += torque;
     }
 
-    units::kilogram_t Body::GetMass() const {
-        if (b2Body_ != nullptr) return units::kilogram_t{b2Body_->GetMass()};
+    wpi::units::kilogram_t Body::GetMass() const {
+        if (b2Body_ != nullptr) return wpi::units::kilogram_t{b2Body_->GetMass()};
         return ComputeMassProperties().mass;
     }
 
-    units::kilogram_square_meter_t Body::GetMomentOfInertia() const {
+    wpi::units::kilogram_square_meter_t Body::GetMomentOfInertia() const {
         if (b2Body_ == nullptr) return ComputeMassProperties().inertiaAboutCenter;
         const b2Vec2 localCenter = b2Body_->GetLocalCenter();
-        return units::kilogram_square_meter_t{b2Body_->GetInertia() - b2Body_->GetMass() * b2Dot(localCenter, localCenter)};
+        return wpi::units::kilogram_square_meter_t{b2Body_->GetInertia() - b2Body_->GetMass() * b2Dot(localCenter, localCenter)};
     }
 
     void Body::SetBullet(bool bullet) {
@@ -168,8 +168,8 @@ namespace maplesim::physics {
         }
         const b2Vec2 localCenter = mass > 0.0f ? (1.0f / mass) * weightedCenter : b2Vec2{0.0f, 0.0f};
         MassProperties properties;
-        properties.mass = units::kilogram_t{mass};
-        properties.inertiaAboutCenter = units::kilogram_square_meter_t{inertiaAboutOrigin - mass * b2Dot(localCenter, localCenter)};
+        properties.mass = wpi::units::kilogram_t{mass};
+        properties.inertiaAboutCenter = wpi::units::kilogram_square_meter_t{inertiaAboutOrigin - mass * b2Dot(localCenter, localCenter)};
         properties.localCenter = detail::ToTranslation2d(localCenter);
         return properties;
     }
@@ -214,11 +214,11 @@ namespace maplesim::physics {
         world_ = nullptr;
     }
 
-    void Body::IntegrateAppliedLoads(units::second_t dt) {
+    void Body::IntegrateAppliedLoads(wpi::units::second_t dt) {
         const Force2d force = std::exchange(appliedForce_, Force2d{});
-        const units::newton_meter_t torque = std::exchange(appliedTorque_, units::newton_meter_t{0});
+        const wpi::units::newton_meter_t torque = std::exchange(appliedTorque_, wpi::units::newton_meter_t{0});
         if (b2Body_->GetType() != b2_dynamicBody) return;
-        if (force != Force2d{} || torque != units::newton_meter_t{0}) b2Body_->SetAwake(true);
+        if (force != Force2d{} || torque != wpi::units::newton_meter_t{0}) b2Body_->SetAwake(true);
         if (!b2Body_->IsAwake()) return;
 
         const double dtSeconds = dt.value();

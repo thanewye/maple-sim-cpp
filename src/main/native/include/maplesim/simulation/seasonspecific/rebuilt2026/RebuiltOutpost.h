@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#include <frc/geometry/Pose3d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation3d.h>
-#include <networktables/StructTopic.h>
-#include <units/angle.h>
-#include <units/velocity.h>
+#include <wpi/math/geometry/Pose3d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/nt/StructTopic.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "maplesim/simulation/Goal.h"
 
@@ -20,30 +20,30 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         RebuiltOutpost(Arena2026Rebuilt& arena, bool isBlue);
 
         void SimulationSubTick(int subTickNum) override;
-        void Draw(std::vector<frc::Pose3d>& drawList) const override;
+        void Draw(std::vector<wpi::math::Pose3d>& drawList) const override;
 
         void Reset();
         void ThrowForGoal();
         void Dump();
-        void ThrowFuel(const frc::Rotation2d& yaw, units::radian_t pitch, units::meters_per_second_t speed);
+        void ThrowFuel(const wpi::math::Rotation2d& yaw, wpi::units::radian_t pitch, wpi::units::meters_per_second_t speed);
 
     protected:
-        [[nodiscard]] static const frc::Translation3d& RedOutpostPose();
-        [[nodiscard]] static const frc::Translation3d& RedLaunchPose();
-        [[nodiscard]] static const frc::Translation3d& RedDumpPose();
-        [[nodiscard]] static const frc::Translation3d& BlueOutpostPose();
-        [[nodiscard]] static const frc::Translation3d& BlueDumpPose();
-        [[nodiscard]] static const frc::Translation3d& BlueLaunchPose();
-        [[nodiscard]] static const frc::Translation3d& RedRenderPose();
-        [[nodiscard]] static const frc::Translation3d& BlueRenderPose();
+        [[nodiscard]] static const wpi::math::Translation3d& RedOutpostPose();
+        [[nodiscard]] static const wpi::math::Translation3d& RedLaunchPose();
+        [[nodiscard]] static const wpi::math::Translation3d& RedDumpPose();
+        [[nodiscard]] static const wpi::math::Translation3d& BlueOutpostPose();
+        [[nodiscard]] static const wpi::math::Translation3d& BlueDumpPose();
+        [[nodiscard]] static const wpi::math::Translation3d& BlueLaunchPose();
+        [[nodiscard]] static const wpi::math::Translation3d& RedRenderPose();
+        [[nodiscard]] static const wpi::math::Translation3d& BlueRenderPose();
 
         void AddPoints() override;
 
         Arena2026Rebuilt& rebuiltArena_;
 
     private:
-        nt::StructPublisher<frc::Pose3d> outpostPublisher_;
-        nt::StructPublisher<frc::Pose3d> outpostThrowPublisher_;
-        nt::StructPublisher<frc::Pose3d> outpostDumpPublisher_;
+        wpi::nt::StructPublisher<wpi::math::Pose3d> outpostPublisher_;
+        wpi::nt::StructPublisher<wpi::math::Pose3d> outpostThrowPublisher_;
+        wpi::nt::StructPublisher<wpi::math::Pose3d> outpostDumpPublisher_;
     };
 } // namespace maplesim::simulation::seasonspecific::rebuilt2026

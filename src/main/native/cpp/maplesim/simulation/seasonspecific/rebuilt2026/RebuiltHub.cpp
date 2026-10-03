@@ -6,12 +6,12 @@
 #include <random>
 #include <string>
 
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Rotation3d.h>
-#include <networktables/NetworkTableInstance.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/velocity.h>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "maplesim/simulation/seasonspecific/rebuilt2026/Arena2026Rebuilt.h"
 #include "maplesim/utils/FieldMirroringUtils.h"
@@ -28,31 +28,32 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         }
     } // namespace
 
-    const frc::Translation3d& RebuiltHub::BlueHubPose() {
-        static const frc::Translation3d blueHubPose{units::meter_t{4.5974}, units::meter_t{4.034536}, units::meter_t{1.5748}};
+    const wpi::math::Translation3d& RebuiltHub::BlueHubPose() {
+        static const wpi::math::Translation3d blueHubPose{wpi::units::meter_t{4.5974}, wpi::units::meter_t{4.034536}, wpi::units::meter_t{1.5748}};
         return blueHubPose;
     }
 
-    const frc::Translation3d& RebuiltHub::RedHubPose() {
-        static const frc::Translation3d redHubPose{units::meter_t{11.938}, units::meter_t{4.034536}, units::meter_t{1.5748}};
+    const wpi::math::Translation3d& RebuiltHub::RedHubPose() {
+        static const wpi::math::Translation3d redHubPose{wpi::units::meter_t{11.938}, wpi::units::meter_t{4.034536}, wpi::units::meter_t{1.5748}};
         return redHubPose;
     }
 
-    const std::array<frc::Pose3d, 4>& RebuiltHub::BlueShootPoses() {
-        static const std::array<frc::Pose3d, 4> blueShootPoses = [] {
+    const std::array<wpi::math::Pose3d, 4>& RebuiltHub::BlueShootPoses() {
+        static const std::array<wpi::math::Pose3d, 4> blueShootPoses = [] {
             const auto blueShootPose = [](double yOffset, double yawDegrees) {
-                return frc::Pose3d{BlueHubPose() + frc::Translation3d{units::meter_t{0.5969}, units::meter_t{yOffset}, units::meter_t{-0.5}},
-                                   frc::Rotation3d{units::degree_t{0}, units::degree_t{-15}, units::degree_t{yawDegrees}}};
+                return wpi::math::Pose3d{BlueHubPose() +
+                                             wpi::math::Translation3d{wpi::units::meter_t{0.5969}, wpi::units::meter_t{yOffset}, wpi::units::meter_t{-0.5}},
+                                         wpi::math::Rotation3d{wpi::units::degree_t{0}, wpi::units::degree_t{-15}, wpi::units::degree_t{yawDegrees}}};
             };
-            return std::array<frc::Pose3d, 4>{blueShootPose(0.447675, 33.75), blueShootPose(0.149225, 11.25), blueShootPose(-0.149225, 11.25),
-                                              blueShootPose(-0.447675, -33.75)};
+            return std::array<wpi::math::Pose3d, 4>{blueShootPose(0.447675, 33.75), blueShootPose(0.149225, 11.25), blueShootPose(-0.149225, 11.25),
+                                                    blueShootPose(-0.447675, -33.75)};
         }();
         return blueShootPoses;
     }
 
-    const std::array<frc::Pose3d, 4>& RebuiltHub::RedShootPoses() {
-        static const std::array<frc::Pose3d, 4> redShootPoses = [] {
-            std::array<frc::Pose3d, 4> flipped;
+    const std::array<wpi::math::Pose3d, 4>& RebuiltHub::RedShootPoses() {
+        static const std::array<wpi::math::Pose3d, 4> redShootPoses = [] {
+            std::array<wpi::math::Pose3d, 4> flipped;
             for (std::size_t i = 0; i < flipped.size(); i++)
                 flipped[i] = utils::FieldMirroringUtils::Flip(BlueShootPoses()[i]);
             return flipped;
@@ -65,16 +66,16 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
     }
 
     RebuiltHub::RebuiltHub(Arena2026Rebuilt& arena, bool isBlue)
-        : Goal(arena, units::inch_t{47}, units::inch_t{47}, units::inch_t{10}, "Fuel", isBlue ? BlueHubPose() : RedHubPose(), isBlue, false)
+        : Goal(arena, wpi::units::inch_t{47}, wpi::units::inch_t{47}, wpi::units::inch_t{10}, "Fuel", isBlue ? BlueHubPose() : RedHubPose(), isBlue, false)
         , rebuiltArena_(arena)
-        , hubPosePublisher_(nt::NetworkTableInstance::GetDefault()
-                                .GetStructTopic<frc::Pose3d>(std::string{"/SmartDashboard/MapleSim/Goals/"} + (isBlue ? "BlueHub" : "RedHub"))
+        , hubPosePublisher_(wpi::nt::NetworkTableInstance::GetDefault()
+                                .GetStructTopic<wpi::math::Pose3d>(std::string{"/SmartDashboard/MapleSim/Goals/"} + (isBlue ? "BlueHub" : "RedHub"))
                                 .Publish()) {
-        hubPosePublisher_.Set(frc::Pose3d{position_, frc::Rotation3d{}});
+        hubPosePublisher_.Set(wpi::math::Pose3d{position_, wpi::math::Rotation3d{}});
     }
 
     bool RebuiltHub::CheckCollision(const gamepieces::GamePiece& gamePiece) const {
-        const frc::Pose3d pose = gamePiece.GetPose3d();
+        const wpi::math::Pose3d pose = gamePiece.GetPose3d();
         return std::pow(pose.X().value() - position_.X().value(), 2) + std::pow(pose.Y().value() - position_.Y().value(), 2) +
                    std::pow(pose.Z().value() - position_.Z().value(), 2) <
                std::pow(kGoalRadius, 2);
@@ -85,11 +86,11 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         rebuiltArena_.AddValueToMatchBreakdown(isBlue, "WastedFuel", rebuiltArena_.IsActive(isBlue) ? 0 : 1);
         rebuiltArena_.AddToScore(isBlue, rebuiltArena_.IsActive(isBlue) ? 1 : 0);
 
-        const frc::Pose3d shootPose = isBlue ? BlueShootPoses()[NextShootPoseIndex()] : RedShootPoses()[NextShootPoseIndex()];
+        const wpi::math::Pose3d shootPose = isBlue ? BlueShootPoses()[NextShootPoseIndex()] : RedShootPoses()[NextShootPoseIndex()];
 
-        rebuiltArena_.AddPieceWithVariance(shootPose.Translation().ToTranslation2d(), frc::Rotation2d{shootPose.Rotation().Z()}, shootPose.Z(),
-                                           units::meters_per_second_t{2}, shootPose.Rotation().Y(), 0, 0.02, 15, 0.2, 5);
+        rebuiltArena_.AddPieceWithVariance(shootPose.Translation().ToTranslation2d(), wpi::math::Rotation2d{shootPose.Rotation().Z()}, shootPose.Z(),
+                                           wpi::units::meters_per_second_t{2}, shootPose.Rotation().Y(), 0, 0.02, 15, 0.2, 5);
     }
 
-    void RebuiltHub::Draw([[maybe_unused]] std::vector<frc::Pose3d>& drawList) const {}
+    void RebuiltHub::Draw([[maybe_unused]] std::vector<wpi::math::Pose3d>& drawList) const {}
 } // namespace maplesim::simulation::seasonspecific::rebuilt2026

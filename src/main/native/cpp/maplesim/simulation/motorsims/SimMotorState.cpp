@@ -5,8 +5,8 @@
 #include <cmath>
 
 namespace maplesim::simulation::motorsims {
-    void SimMotorState::Step(units::newton_meter_t finalElectricTorque, units::newton_meter_t finalFrictionTorque, units::kilogram_square_meter_t loadMOI,
-                             units::second_t dt) {
+    void SimMotorState::Step(wpi::units::newton_meter_t finalElectricTorque, wpi::units::newton_meter_t finalFrictionTorque,
+                             wpi::units::kilogram_square_meter_t loadMOI, wpi::units::second_t dt) {
         double currentAngularPositionRadians = mechanismAngularPosition.value();
         double currentAngularVelocityRadiansPerSecond = mechanismAngularVelocity.value();
         const double electricTorqueNewtonsMeters = finalElectricTorque.value();
@@ -25,7 +25,7 @@ namespace maplesim::simulation::motorsims {
 
         currentAngularPositionRadians += currentAngularVelocityRadiansPerSecond * dtSeconds;
 
-        mechanismAngularPosition = units::radian_t{currentAngularPositionRadians};
-        mechanismAngularVelocity = units::radians_per_second_t{currentAngularVelocityRadiansPerSecond};
+        mechanismAngularPosition = wpi::units::radian_t{currentAngularPositionRadians};
+        mechanismAngularVelocity = wpi::units::radians_per_second_t{currentAngularVelocityRadiansPerSecond};
     }
 } // namespace maplesim::simulation::motorsims

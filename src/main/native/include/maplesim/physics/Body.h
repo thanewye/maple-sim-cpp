@@ -3,14 +3,14 @@
 #include <memory>
 #include <vector>
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
-#include <units/angular_velocity.h>
-#include <units/mass.h>
-#include <units/moment_of_inertia.h>
-#include <units/time.h>
-#include <units/torque.h>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/mass.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/torque.hpp>
 
 #include "maplesim/physics/Fixture.h"
 #include "maplesim/physics/Shape.h"
@@ -44,30 +44,30 @@ namespace maplesim::physics {
         void Detach(Fixture& fixture);
         [[nodiscard]] const std::vector<Fixture*>& GetFixtures() const { return fixtures_; }
 
-        [[nodiscard]] frc::Pose2d GetPose() const;
-        void SetPose(const frc::Pose2d& pose);
+        [[nodiscard]] wpi::math::Pose2d GetPose() const;
+        void SetPose(const wpi::math::Pose2d& pose);
 
         [[nodiscard]] LinearVelocity2d GetLinearVelocity() const;
         void SetLinearVelocity(const LinearVelocity2d& velocity);
-        [[nodiscard]] units::radians_per_second_t GetAngularVelocity() const;
-        void SetAngularVelocity(units::radians_per_second_t velocity);
+        [[nodiscard]] wpi::units::radians_per_second_t GetAngularVelocity() const;
+        void SetAngularVelocity(wpi::units::radians_per_second_t velocity);
         /** Field-relative linear and angular velocity. */
-        [[nodiscard]] frc::ChassisSpeeds GetVelocity() const;
-        void SetVelocity(const frc::ChassisSpeeds& fieldRelativeVelocity);
+        [[nodiscard]] wpi::math::ChassisVelocities GetVelocity() const;
+        void SetVelocity(const wpi::math::ChassisVelocities& fieldRelativeVelocity);
 
-        [[nodiscard]] frc::Translation2d GetWorldCenter() const;
-        [[nodiscard]] frc::Translation2d GetWorldPoint(const frc::Translation2d& localPoint) const;
-        [[nodiscard]] LinearVelocity2d GetVelocityAtPoint(const frc::Translation2d& worldPoint) const;
+        [[nodiscard]] wpi::math::Translation2d GetWorldCenter() const;
+        [[nodiscard]] wpi::math::Translation2d GetWorldPoint(const wpi::math::Translation2d& localPoint) const;
+        [[nodiscard]] LinearVelocity2d GetVelocityAtPoint(const wpi::math::Translation2d& worldPoint) const;
 
         /** Applies a force at the center of mass until the next World step. */
         void ApplyForce(const Force2d& force);
         /** Applies a force at a world point until the next World step, producing torque about the current world center. */
-        void ApplyForce(const Force2d& force, const frc::Translation2d& worldPoint);
-        void ApplyTorque(units::newton_meter_t torque);
+        void ApplyForce(const Force2d& force, const wpi::math::Translation2d& worldPoint);
+        void ApplyTorque(wpi::units::newton_meter_t torque);
 
-        [[nodiscard]] units::kilogram_t GetMass() const;
+        [[nodiscard]] wpi::units::kilogram_t GetMass() const;
         /** Moment of inertia about the center of mass. */
-        [[nodiscard]] units::kilogram_square_meter_t GetMomentOfInertia() const;
+        [[nodiscard]] wpi::units::kilogram_square_meter_t GetMomentOfInertia() const;
 
         void SetLinearDamping(double damping) { linearDamping_ = damping; }
         [[nodiscard]] double GetLinearDamping() const { return linearDamping_; }
@@ -82,27 +82,27 @@ namespace maplesim::physics {
         friend class World;
 
         struct MassProperties {
-            units::kilogram_t mass{0};
-            units::kilogram_square_meter_t inertiaAboutCenter{0};
-            frc::Translation2d localCenter;
+            wpi::units::kilogram_t mass{0};
+            wpi::units::kilogram_square_meter_t inertiaAboutCenter{0};
+            wpi::math::Translation2d localCenter;
         };
 
         [[nodiscard]] MassProperties ComputeMassProperties() const;
         void CreateB2Fixture(Fixture& fixture);
         void CreateB2Body(World& world, b2World& b2WorldHandle);
         void DestroyB2Body();
-        void IntegrateAppliedLoads(units::second_t dt);
+        void IntegrateAppliedLoads(wpi::units::second_t dt);
 
         BodyType type_ = BodyType::kStatic;
-        frc::Pose2d pose_;
+        wpi::math::Pose2d pose_;
         LinearVelocity2d linearVelocity_;
-        units::radians_per_second_t angularVelocity_{0};
+        wpi::units::radians_per_second_t angularVelocity_{0};
         double linearDamping_ = 0.0;
         double angularDamping_ = 0.01;
         bool bullet_ = false;
 
         Force2d appliedForce_;
-        units::newton_meter_t appliedTorque_{0};
+        wpi::units::newton_meter_t appliedTorque_{0};
 
         std::vector<Fixture*> fixtures_;
         std::vector<std::unique_ptr<Fixture>> ownedFixtures_;

@@ -6,8 +6,9 @@
 #include <optional>
 #include <random>
 
-#include <frc/DriverStation.h>
-#include <frc/geometry/Pose2d.h>
+#include <wpi/driverstation/MatchState.hpp>
+#include <wpi/driverstation/RobotState.hpp>
+#include <wpi/math/geometry/Pose2d.hpp>
 
 #include "maplesim/simulation/seasonspecific/rebuilt2026/RebuiltFuelOnField.h"
 #include "maplesim/simulation/seasonspecific/rebuilt2026/RebuiltFuelOnFly.h"
@@ -25,27 +26,27 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
             return std::uniform_real_distribution<double>{0.0, 1.0}(GetRandom());
         }
 
-        [[nodiscard]] frc::Pose2d MetersPose(double x, double y) {
-            return frc::Pose2d{units::meter_t{x}, units::meter_t{y}, frc::Rotation2d{}};
+        [[nodiscard]] wpi::math::Pose2d MetersPose(double x, double y) {
+            return wpi::math::Pose2d{wpi::units::meter_t{x}, wpi::units::meter_t{y}, wpi::math::Rotation2d{}};
         }
 
-        [[nodiscard]] frc::Translation2d FuelGridOffset(int x, int y) {
-            return frc::Translation2d{units::inch_t{5.991 * x}, units::inch_t{5.95 * y}};
+        [[nodiscard]] wpi::math::Translation2d FuelGridOffset(int x, int y) {
+            return wpi::math::Translation2d{wpi::units::inch_t{5.991 * x}, wpi::units::inch_t{5.95 * y}};
         }
     } // namespace
 
     Arena2026Rebuilt::RebuiltFieldObstaclesMap::RebuiltFieldObstaclesMap(bool addRampCollider) {
-        AddBorderLine(frc::Translation2d{units::meter_t{kFieldXMin}, units::meter_t{kFieldYMin}},
-                      frc::Translation2d{units::meter_t{kFieldXMin}, units::meter_t{kFieldYMax}});
+        AddBorderLine(wpi::math::Translation2d{wpi::units::meter_t{kFieldXMin}, wpi::units::meter_t{kFieldYMin}},
+                      wpi::math::Translation2d{wpi::units::meter_t{kFieldXMin}, wpi::units::meter_t{kFieldYMax}});
 
-        AddBorderLine(frc::Translation2d{units::meter_t{kFieldXMax}, units::meter_t{kFieldYMin}},
-                      frc::Translation2d{units::meter_t{kFieldXMax}, units::meter_t{kFieldYMax}});
+        AddBorderLine(wpi::math::Translation2d{wpi::units::meter_t{kFieldXMax}, wpi::units::meter_t{kFieldYMin}},
+                      wpi::math::Translation2d{wpi::units::meter_t{kFieldXMax}, wpi::units::meter_t{kFieldYMax}});
 
-        AddBorderLine(frc::Translation2d{units::meter_t{kFieldXMin}, units::meter_t{kFieldYMin}},
-                      frc::Translation2d{units::meter_t{kFieldXMax}, units::meter_t{kFieldYMin}});
+        AddBorderLine(wpi::math::Translation2d{wpi::units::meter_t{kFieldXMin}, wpi::units::meter_t{kFieldYMin}},
+                      wpi::math::Translation2d{wpi::units::meter_t{kFieldXMax}, wpi::units::meter_t{kFieldYMin}});
 
-        AddBorderLine(frc::Translation2d{units::meter_t{kFieldXMin}, units::meter_t{kFieldYMax}},
-                      frc::Translation2d{units::meter_t{kFieldXMax}, units::meter_t{kFieldYMax}});
+        AddBorderLine(wpi::math::Translation2d{wpi::units::meter_t{kFieldXMin}, wpi::units::meter_t{kFieldYMax}},
+                      wpi::math::Translation2d{wpi::units::meter_t{kFieldXMax}, wpi::units::meter_t{kFieldYMax}});
 
         AddRectangularObstacle(kUprightXLen, kUprightYLen, MetersPose(kUprightOffsetFromEndWall, kUprightOffsetFromSideWall));
         AddRectangularObstacle(kUprightXLen, kUprightYLen, MetersPose(kUprightOffsetFromEndWall, kUprightOffsetFromSideWall + kUprightYSpacing));
@@ -100,13 +101,14 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         GetRandom().seed(seed);
     }
 
-    void Arena2026Rebuilt::AddPieceWithVariance(const frc::Translation2d& piecePose, const frc::Rotation2d& yaw, units::meter_t height,
-                                                units::meters_per_second_t speed, units::radian_t pitch, double xVariance, double yVariance, double yawVariance,
-                                                double speedVariance, double pitchVariance) {
+    void Arena2026Rebuilt::AddPieceWithVariance(const wpi::math::Translation2d& piecePose, const wpi::math::Rotation2d& yaw, wpi::units::meter_t height,
+                                                wpi::units::meters_per_second_t speed, wpi::units::radian_t pitch, double xVariance, double yVariance,
+                                                double yawVariance, double speedVariance, double pitchVariance) {
         AddGamePieceProjectile(std::make_unique<RebuiltFuelOnFly>(
-            piecePose + frc::Translation2d{units::meter_t{RandomInRange(xVariance)}, units::meter_t{RandomInRange(yVariance)}}, frc::Translation2d{},
-            frc::ChassisSpeeds{}, yaw + frc::Rotation2d{units::degree_t{RandomInRange(yawVariance)}}, height,
-            speed + units::meters_per_second_t{RandomInRange(speedVariance)}, units::degree_t{units::degree_t{pitch}.value() + RandomInRange(pitchVariance)}));
+            piecePose + wpi::math::Translation2d{wpi::units::meter_t{RandomInRange(xVariance)}, wpi::units::meter_t{RandomInRange(yVariance)}},
+            wpi::math::Translation2d{}, wpi::math::ChassisVelocities{}, yaw + wpi::math::Rotation2d{wpi::units::degree_t{RandomInRange(yawVariance)}}, height,
+            speed + wpi::units::meters_per_second_t{RandomInRange(speedVariance)},
+            wpi::units::degree_t{wpi::units::degree_t{pitch}.value() + RandomInRange(pitchVariance)}));
     }
 
     void Arena2026Rebuilt::PlaceGamePiecesOnField() {
@@ -119,8 +121,8 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
             }
         }
 
-        const std::optional<frc::DriverStation::Alliance> alliance = frc::DriverStation::GetAlliance();
-        const bool isOnBlue = alliance.has_value() && alliance.value() == frc::DriverStation::Alliance::kBlue;
+        const std::optional<wpi::Alliance> alliance = wpi::MatchState::GetAlliance();
+        const bool isOnBlue = alliance.has_value() && alliance.value() == wpi::Alliance::BLUE;
 
         if (isOnBlue || !isInEfficiencyMode_) {
             for (int x = 0; x < 4; x++) {
@@ -144,8 +146,8 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         SetupValueForMatchBreakdown("WastedFuel");
     }
 
-    std::vector<frc::Pose3d> Arena2026Rebuilt::GetGamePiecesPosesByType(const std::string& type) const {
-        std::vector<frc::Pose3d> poses = SimulatedArena::GetGamePiecesPosesByType(type);
+    std::vector<wpi::math::Pose3d> Arena2026Rebuilt::GetGamePiecesPosesByType(const std::string& type) const {
+        std::vector<wpi::math::Pose3d> poses = SimulatedArena::GetGamePiecesPosesByType(type);
 
         blueOutpost_->Draw(poses);
         redOutpost_->Draw(poses);
@@ -154,7 +156,7 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
     }
 
     void Arena2026Rebuilt::SimulationSubTick(int tickNum) {
-        if (shouldClock_ && !frc::DriverStation::IsAutonomous() && frc::DriverStation::IsEnabled()) {
+        if (shouldClock_ && !wpi::RobotState::IsAutonomous() && wpi::RobotState::IsEnabled()) {
             if (matchClock_.Get().value() >= nextClockSwapTime_) {
                 nextClockSwapTime_ = matchClock_.Get().value() + 25;
                 blueIsOnClock_ = !blueIsOnClock_;
@@ -171,8 +173,8 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
     }
 
     bool Arena2026Rebuilt::IsActive(bool isBlue) const {
-        if (isBlue) return blueIsOnClock_ || frc::DriverStation::IsAutonomous() || !shouldClock_;
-        return !blueIsOnClock_ || frc::DriverStation::IsAutonomous() || !shouldClock_;
+        if (isBlue) return blueIsOnClock_ || wpi::RobotState::IsAutonomous() || !shouldClock_;
+        return !blueIsOnClock_ || wpi::RobotState::IsAutonomous() || !shouldClock_;
     }
 
     void Arena2026Rebuilt::SetShouldRunClock(bool shouldRunClock) {
@@ -187,7 +189,8 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         (isBlue ? blueOutpost_ : redOutpost_)->ThrowForGoal();
     }
 
-    void Arena2026Rebuilt::OutpostThrow(bool isBlue, const frc::Rotation2d& throwYaw, units::radian_t throwPitch, units::meters_per_second_t speed) {
+    void Arena2026Rebuilt::OutpostThrow(bool isBlue, const wpi::math::Rotation2d& throwYaw, wpi::units::radian_t throwPitch,
+                                        wpi::units::meters_per_second_t speed) {
         (isBlue ? blueOutpost_ : redOutpost_)->ThrowFuel(throwYaw, throwPitch, speed);
     }
 

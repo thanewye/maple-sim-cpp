@@ -1,23 +1,23 @@
 #pragma once
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Pose3d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/geometry/Translation3d.h>
-#include <units/length.h>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Pose3d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/units/length.hpp>
 
 namespace maplesim::utils::FieldMirroringUtils {
-    inline constexpr units::meter_t kFieldWidth{17.548};
-    inline constexpr units::meter_t kFieldHeight{8.052};
+    inline constexpr wpi::units::meter_t kFieldWidth{17.548};
+    inline constexpr wpi::units::meter_t kFieldHeight{8.052};
 
-    [[nodiscard]] frc::Rotation2d ToCurrentAllianceRotation(const frc::Rotation2d& rotationAtBlueSide);
-    [[nodiscard]] frc::Rotation2d Flip(const frc::Rotation2d& rotation);
-    [[nodiscard]] frc::Translation2d ToCurrentAllianceTranslation(const frc::Translation2d& translationAtBlueSide);
-    [[nodiscard]] frc::Translation2d Flip(const frc::Translation2d& translation);
-    [[nodiscard]] frc::Pose3d Flip(const frc::Pose3d& toFlip);
-    [[nodiscard]] frc::Translation3d ToCurrentAllianceTranslation(const frc::Translation3d& translation3dAtBlueSide);
-    [[nodiscard]] frc::Pose2d ToCurrentAlliancePose(const frc::Pose2d& poseAtBlueSide);
+    [[nodiscard]] wpi::math::Rotation2d ToCurrentAllianceRotation(const wpi::math::Rotation2d& rotationAtBlueSide);
+    [[nodiscard]] wpi::math::Rotation2d Flip(const wpi::math::Rotation2d& rotation);
+    [[nodiscard]] wpi::math::Translation2d ToCurrentAllianceTranslation(const wpi::math::Translation2d& translationAtBlueSide);
+    [[nodiscard]] wpi::math::Translation2d Flip(const wpi::math::Translation2d& translation);
+    [[nodiscard]] wpi::math::Pose3d Flip(const wpi::math::Pose3d& toFlip);
+    [[nodiscard]] wpi::math::Translation3d ToCurrentAllianceTranslation(const wpi::math::Translation3d& translation3dAtBlueSide);
+    [[nodiscard]] wpi::math::Pose2d ToCurrentAlliancePose(const wpi::math::Pose2d& poseAtBlueSide);
     [[nodiscard]] bool IsSidePresentedAsRed();
-    [[nodiscard]] frc::Rotation2d GetCurrentAllianceDriverStationFacing();
+    [[nodiscard]] wpi::math::Rotation2d GetCurrentAllianceDriverStationFacing();
 } // namespace maplesim::utils::FieldMirroringUtils

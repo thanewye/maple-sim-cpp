@@ -3,8 +3,8 @@
 #include <deque>
 #include <vector>
 
-#include <frc/geometry/Rotation2d.h>
-#include <units/angular_velocity.h>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/units/angular_velocity.hpp>
 
 namespace maplesim::simulation::drivesims {
     /** Gyro that integrates the drivetrain's true angular velocity with measurement noise, idle drift and impact drift. */
@@ -12,25 +12,25 @@ namespace maplesim::simulation::drivesims {
     public:
         GyroSimulation(double averageDriftingIn30SecsMotionlessDeg, double velocityMeasurementStandardDeviationPercent);
 
-        void SetRotation(const frc::Rotation2d& currentRotation);
-        [[nodiscard]] frc::Rotation2d GetGyroReading() const { return gyroReading_; }
-        [[nodiscard]] units::radians_per_second_t GetMeasuredAngularVelocity() const;
+        void SetRotation(const wpi::math::Rotation2d& currentRotation);
+        [[nodiscard]] wpi::math::Rotation2d GetGyroReading() const { return gyroReading_; }
+        [[nodiscard]] wpi::units::radians_per_second_t GetMeasuredAngularVelocity() const;
         /** Readings from each sub-tick of the last robot period, oldest first. */
-        [[nodiscard]] std::vector<frc::Rotation2d> GetCachedGyroReadings() const;
+        [[nodiscard]] std::vector<wpi::math::Rotation2d> GetCachedGyroReadings() const;
 
-        void UpdateSimulationSubTick(units::radians_per_second_t actualAngularVelocity);
+        void UpdateSimulationSubTick(wpi::units::radians_per_second_t actualAngularVelocity);
 
     private:
-        [[nodiscard]] frc::Rotation2d GetDriftingDueToImpact(double actualAngularVelocityRadPerSec);
-        [[nodiscard]] frc::Rotation2d GetGyroDTheta(double actualAngularVelocityRadPerSec);
-        [[nodiscard]] frc::Rotation2d GetNoMotionDrifting() const;
+        [[nodiscard]] wpi::math::Rotation2d GetDriftingDueToImpact(double actualAngularVelocityRadPerSec);
+        [[nodiscard]] wpi::math::Rotation2d GetGyroDTheta(double actualAngularVelocityRadPerSec);
+        [[nodiscard]] wpi::math::Rotation2d GetNoMotionDrifting() const;
 
         const double averageDriftingIn30SecsMotionlessDeg_;
         const double velocityMeasurementStandardDeviationPercent_;
 
-        frc::Rotation2d gyroReading_;
+        wpi::math::Rotation2d gyroReading_;
         double measuredAngularVelocityRadPerSec_ = 0.0;
         double previousAngularVelocityRadPerSec_ = 0.0;
-        std::deque<frc::Rotation2d> cachedRotations_;
+        std::deque<wpi::math::Rotation2d> cachedRotations_;
     };
 } // namespace maplesim::simulation::drivesims

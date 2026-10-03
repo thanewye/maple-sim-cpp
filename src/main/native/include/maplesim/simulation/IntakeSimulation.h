@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include <units/length.h>
+#include <wpi/units/length.hpp>
 
 #include "maplesim/physics/Fixture.h"
 #include "maplesim/physics/Shape.h"
@@ -36,15 +36,15 @@ namespace maplesim::simulation {
         };
 
         static IntakeSimulation& InTheFrameIntake(const std::string& targetedGamePieceType, drivesims::AbstractDriveTrainSimulation& driveTrainSimulation,
-                                                  units::meter_t width, IntakeSide side, int capacity);
+                                                  wpi::units::meter_t width, IntakeSide side, int capacity);
         static IntakeSimulation& InTheFrameIntake(SimulatedArena& arena, const std::string& targetedGamePieceType,
-                                                  drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, units::meter_t width, IntakeSide side,
+                                                  drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, wpi::units::meter_t width, IntakeSide side,
                                                   int capacity);
         static IntakeSimulation& OverTheBumperIntake(const std::string& targetedGamePieceType, drivesims::AbstractDriveTrainSimulation& driveTrainSimulation,
-                                                     units::meter_t width, units::meter_t lengthExtended, IntakeSide side, int capacity);
+                                                     wpi::units::meter_t width, wpi::units::meter_t lengthExtended, IntakeSide side, int capacity);
         static IntakeSimulation& OverTheBumperIntake(SimulatedArena& arena, const std::string& targetedGamePieceType,
-                                                     drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, units::meter_t width,
-                                                     units::meter_t lengthExtended, IntakeSide side, int capacity);
+                                                     drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, wpi::units::meter_t width,
+                                                     wpi::units::meter_t lengthExtended, IntakeSide side, int capacity);
 
         /** Unregistered until handed to Register, which transfers ownership to the arena. */
         IntakeSimulation(std::string targetedGamePieceType, drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, physics::Shape shape, int capacity);

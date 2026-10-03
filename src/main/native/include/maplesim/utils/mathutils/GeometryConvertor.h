@@ -1,8 +1,8 @@
 #pragma once
 
-#include <frc/geometry/Translation2d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
 
 namespace maplesim::utils::mathutils::GeometryConvertor {
-    [[nodiscard]] frc::Translation2d GetChassisSpeedsTranslationalComponent(const frc::ChassisSpeeds& chassisSpeeds);
+    [[nodiscard]] wpi::math::Translation2d GetChassisSpeedsTranslationalComponent(const wpi::math::ChassisVelocities& chassisSpeeds);
 } // namespace maplesim::utils::mathutils::GeometryConvertor

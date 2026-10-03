@@ -44,8 +44,8 @@ namespace maplesim::utils::mathutils::MapleCommonMath {
         return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
     }
 
-    frc::Rotation2d GetAngle(const frc::Translation2d& translation2d) {
+    wpi::math::Rotation2d GetAngle(const wpi::math::Translation2d& translation2d) {
         const double tooSmall = 1e-6;
-        return translation2d.Norm().value() < tooSmall ? frc::Rotation2d{} : translation2d.Angle();
+        return translation2d.Norm().value() < tooSmall ? wpi::math::Rotation2d{} : translation2d.Angle().value_or(wpi::math::Rotation2d{});
     }
 } // namespace maplesim::utils::mathutils::MapleCommonMath

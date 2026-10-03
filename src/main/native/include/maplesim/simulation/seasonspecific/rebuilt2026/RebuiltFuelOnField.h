@@ -1,6 +1,6 @@
 #pragma once
 
-#include <frc/geometry/Translation2d.h>
+#include <wpi/math/geometry/Translation2d.hpp>
 
 #include "maplesim/simulation/gamepieces/GamePieceOnFieldSimulation.h"
 
@@ -10,6 +10,6 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
     public:
         [[nodiscard]] static const GamePieceInfo& RebuiltFuelInfo();
 
-        explicit RebuiltFuelOnField(const frc::Translation2d& initialPosition);
+        explicit RebuiltFuelOnField(const wpi::math::Translation2d& initialPosition);
     };
 } // namespace maplesim::simulation::seasonspecific::rebuilt2026

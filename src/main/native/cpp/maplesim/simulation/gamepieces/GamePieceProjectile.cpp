@@ -8,7 +8,7 @@
 #include <memory>
 #include <utility>
 
-#include <frc/geometry/Pose2d.h>
+#include <wpi/math/geometry/Pose2d.hpp>
 
 #include "maplesim/simulation/SimulatedArena.h"
 
@@ -23,30 +23,32 @@ namespace maplesim::simulation::gamepieces {
         }
     } // namespace
 
-    GamePieceProjectile::GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const frc::Translation2d& robotPosition,
-                                             const frc::Translation2d& shooterPositionOnRobot, const frc::ChassisSpeeds& chassisSpeedsFieldRelative,
-                                             const frc::Rotation2d& shooterFacing, units::meter_t initialHeight, units::meters_per_second_t launchingSpeed,
-                                             units::radian_t shooterAngle)
+    GamePieceProjectile::GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const wpi::math::Translation2d& robotPosition,
+                                             const wpi::math::Translation2d& shooterPositionOnRobot,
+                                             const wpi::math::ChassisVelocities& chassisSpeedsFieldRelative, const wpi::math::Rotation2d& shooterFacing,
+                                             wpi::units::meter_t initialHeight, wpi::units::meters_per_second_t launchingSpeed,
+                                             wpi::units::radian_t shooterAngle)
         : GamePieceProjectile(info, robotPosition + shooterPositionOnRobot.RotateBy(shooterFacing),
                               CalculateInitialProjectileVelocityMPS(shooterPositionOnRobot, chassisSpeedsFieldRelative, shooterFacing,
                                                                     launchingSpeed.value() * std::cos(shooterAngle.value())),
                               initialHeight.value(), launchingSpeed.value() * std::sin(shooterAngle.value()),
-                              frc::Rotation3d{units::radian_t{0}, -shooterAngle, shooterFacing.Radians()}) {}
+                              wpi::math::Rotation3d{wpi::units::radian_t{0}, -shooterAngle, shooterFacing.Radians()}) {}
 
-    frc::Translation2d GamePieceProjectile::CalculateInitialProjectileVelocityMPS(const frc::Translation2d& shooterPositionOnRobot,
-                                                                                  const frc::ChassisSpeeds& chassisSpeeds, const frc::Rotation2d& chassisFacing,
-                                                                                  double groundSpeedMPS) {
-        const frc::Translation2d chassisTranslationalVelocity{units::meter_t{chassisSpeeds.vx.value()}, units::meter_t{chassisSpeeds.vy.value()}};
-        const frc::Translation2d shooterGroundVelocityDueToChassisRotation =
-            shooterPositionOnRobot.RotateBy(chassisFacing).RotateBy(frc::Rotation2d{units::degree_t{90}}) * chassisSpeeds.omega.value();
-        const frc::Translation2d shooterGroundVelocity = chassisTranslationalVelocity + shooterGroundVelocityDueToChassisRotation;
+    wpi::math::Translation2d GamePieceProjectile::CalculateInitialProjectileVelocityMPS(const wpi::math::Translation2d& shooterPositionOnRobot,
+                                                                                        const wpi::math::ChassisVelocities& chassisSpeeds,
+                                                                                        const wpi::math::Rotation2d& chassisFacing, double groundSpeedMPS) {
+        const wpi::math::Translation2d chassisTranslationalVelocity{wpi::units::meter_t{chassisSpeeds.vx.value()},
+                                                                    wpi::units::meter_t{chassisSpeeds.vy.value()}};
+        const wpi::math::Translation2d shooterGroundVelocityDueToChassisRotation =
+            shooterPositionOnRobot.RotateBy(chassisFacing).RotateBy(wpi::math::Rotation2d{wpi::units::degree_t{90}}) * chassisSpeeds.omega.value();
+        const wpi::math::Translation2d shooterGroundVelocity = chassisTranslationalVelocity + shooterGroundVelocityDueToChassisRotation;
 
-        return shooterGroundVelocity + frc::Translation2d{units::meter_t{groundSpeedMPS}, chassisFacing};
+        return shooterGroundVelocity + wpi::math::Translation2d{wpi::units::meter_t{groundSpeedMPS}, chassisFacing};
     }
 
-    GamePieceProjectile::GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const frc::Translation2d& initialPosition,
-                                             const frc::Translation2d& initialLaunchingVelocityMPS, double initialHeight, double initialVerticalSpeedMPS,
-                                             const frc::Rotation3d& gamePieceRotation)
+    GamePieceProjectile::GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const wpi::math::Translation2d& initialPosition,
+                                             const wpi::math::Translation2d& initialLaunchingVelocityMPS, double initialHeight, double initialVerticalSpeedMPS,
+                                             const wpi::math::Rotation3d& gamePieceRotation)
         : gamePieceType(info.type)
         , info_(info)
         , initialPosition_(initialPosition)
@@ -58,16 +60,16 @@ namespace maplesim::simulation::gamepieces {
     void GamePieceProjectile::Launch() {
         constexpr int kMaxIterations = 100;
         constexpr double kStepSeconds = 0.02;
-        std::vector<frc::Pose3d> trajectoryPoints;
+        std::vector<wpi::math::Pose3d> trajectoryPoints;
 
         for (int i = 0; i < kMaxIterations; i++) {
             const double t = i * kStepSeconds;
-            const frc::Translation3d currentPosition = GetPositionAtTime(t);
+            const wpi::math::Translation3d currentPosition = GetPositionAtTime(t);
             trajectoryPoints.emplace_back(currentPosition, gamePieceRotation_);
 
             if (currentPosition.Z().value() < heightAsTouchGround_ && t * kGravity > initialVerticalSpeedMPS_) break;
             if (IsOutOfField(t)) break;
-            const frc::Translation3d displacementToTarget = targetPositionSupplier_() - currentPosition;
+            const wpi::math::Translation3d displacementToTarget = targetPositionSupplier_() - currentPosition;
             if (std::abs(displacementToTarget.X().value()) < tolerance_.X().value() && std::abs(displacementToTarget.Y().value()) < tolerance_.Y().value() &&
                 std::abs(displacementToTarget.Z().value()) < tolerance_.Z().value()) {
                 calculatedHitTargetTime_ = t;
@@ -91,7 +93,7 @@ namespace maplesim::simulation::gamepieces {
     }
 
     bool GamePieceProjectile::IsOutOfField(double time) const {
-        const frc::Translation3d position = GetPositionAtTime(time);
+        const wpi::math::Translation3d position = GetPositionAtTime(time);
         constexpr double kEdgeTolerance = 2;
         return position.X().value() < -kEdgeTolerance || position.X().value() > kLegacyFieldMirroringUtils2024FieldWidth + kEdgeTolerance ||
                position.Y().value() < -kEdgeTolerance || position.Y().value() > kLegacyFieldMirroringUtils2024FieldHeight + kEdgeTolerance;
@@ -107,22 +109,22 @@ namespace maplesim::simulation::gamepieces {
         return *this;
     }
 
-    frc::Translation3d GamePieceProjectile::GetPositionAtTime(double t) const {
+    wpi::math::Translation3d GamePieceProjectile::GetPositionAtTime(double t) const {
         const double height = HeightAtTime(initialHeight_, initialVerticalSpeedMPS_, t);
-        const frc::Translation2d current2dPosition = initialPosition_ + initialLaunchingVelocityMPS_ * t;
-        return frc::Translation3d{current2dPosition.X(), current2dPosition.Y(), units::meter_t{height}};
+        const wpi::math::Translation2d current2dPosition = initialPosition_ + initialLaunchingVelocityMPS_ * t;
+        return wpi::math::Translation3d{current2dPosition.X(), current2dPosition.Y(), wpi::units::meter_t{height}};
     }
 
-    frc::Translation3d GamePieceProjectile::GetVelocityMPSAtTime(double t) const {
+    wpi::math::Translation3d GamePieceProjectile::GetVelocityMPSAtTime(double t) const {
         const double verticalVelocityMPS = initialVerticalSpeedMPS_ - kGravity * t;
-        return frc::Translation3d{initialLaunchingVelocityMPS_.X(), initialLaunchingVelocityMPS_.Y(), units::meter_t{verticalVelocityMPS}};
+        return wpi::math::Translation3d{initialLaunchingVelocityMPS_.X(), initialLaunchingVelocityMPS_.Y(), wpi::units::meter_t{verticalVelocityMPS}};
     }
 
-    frc::Pose3d GamePieceProjectile::GetPose3d() const {
-        return frc::Pose3d{GetPositionAtTime(launchedTimer_.Get().value()), gamePieceRotation_};
+    wpi::math::Pose3d GamePieceProjectile::GetPose3d() const {
+        return wpi::math::Pose3d{GetPositionAtTime(launchedTimer_.Get().value()), gamePieceRotation_};
     }
 
-    frc::Translation3d GamePieceProjectile::GetVelocity3dMPS() const {
+    wpi::math::Translation3d GamePieceProjectile::GetVelocity3dMPS() const {
         return GetVelocityMPSAtTime(launchedTimer_.Get().value());
     }
 
@@ -135,7 +137,7 @@ namespace maplesim::simulation::gamepieces {
              launchedTimer = launchedTimer_] {
                 return std::max(halfGamePieceHeight, HeightAtTime(initialHeight, initialVerticalSpeedMPS, launchedTimer.Get().value()));
             },
-            frc::Pose2d{GetPositionAtTime(timeSinceLaunch).ToTranslation2d(), frc::Rotation2d{}}, initialLaunchingVelocityMPS_));
+            wpi::math::Pose2d{GetPositionAtTime(timeSinceLaunch).ToTranslation2d(), wpi::math::Rotation2d{}}, initialLaunchingVelocityMPS_));
     }
 
     void GamePieceProjectile::UpdateGamePieceProjectiles(SimulatedArena& simulatedArena, const std::vector<GamePieceProjectile*>& gamePieceProjectiles) {
@@ -165,12 +167,12 @@ namespace maplesim::simulation::gamepieces {
         return *this;
     }
 
-    GamePieceProjectile& GamePieceProjectile::WithTargetPosition(std::function<frc::Translation3d()> targetPositionSupplier) {
+    GamePieceProjectile& GamePieceProjectile::WithTargetPosition(std::function<wpi::math::Translation3d()> targetPositionSupplier) {
         targetPositionSupplier_ = std::move(targetPositionSupplier);
         return *this;
     }
 
-    GamePieceProjectile& GamePieceProjectile::WithTargetTolerance(const frc::Translation3d& tolerance) {
+    GamePieceProjectile& GamePieceProjectile::WithTargetTolerance(const wpi::math::Translation3d& tolerance) {
         tolerance_ = tolerance;
         return *this;
     }

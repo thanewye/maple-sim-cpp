@@ -6,30 +6,30 @@
 #include <limits>
 
 namespace maplesim::simulation::motorsims {
-    SimulatedMotorController::GenericMotorController::GenericMotorController(frc::DCMotor model)
+    SimulatedMotorController::GenericMotorController::GenericMotorController(wpi::math::DCMotor model)
         : model_(model)
         , forwardSoftwareLimit_(std::numeric_limits<double>::infinity())
         , reverseSoftwareLimit_(-std::numeric_limits<double>::infinity()) {}
 
-    SimulatedMotorController::GenericMotorController& SimulatedMotorController::GenericMotorController::WithCurrentLimit(units::ampere_t currentLimit) {
+    SimulatedMotorController::GenericMotorController& SimulatedMotorController::GenericMotorController::WithCurrentLimit(wpi::units::ampere_t currentLimit) {
         currentLimit_ = currentLimit;
         return *this;
     }
 
     SimulatedMotorController::GenericMotorController&
-    SimulatedMotorController::GenericMotorController::WithSoftwareLimits(units::radian_t forwardSoftwareLimit, units::radian_t reverseSoftwareLimit) {
+    SimulatedMotorController::GenericMotorController::WithSoftwareLimits(wpi::units::radian_t forwardSoftwareLimit, wpi::units::radian_t reverseSoftwareLimit) {
         forwardSoftwareLimit_ = forwardSoftwareLimit;
         reverseSoftwareLimit_ = reverseSoftwareLimit;
         return *this;
     }
 
-    void SimulatedMotorController::GenericMotorController::RequestVoltage(units::volt_t voltage) {
+    void SimulatedMotorController::GenericMotorController::RequestVoltage(wpi::units::volt_t voltage) {
         requestedVoltage_ = voltage;
     }
 
-    units::volt_t SimulatedMotorController::GenericMotorController::ConstrainOutputVoltage(units::radian_t encoderAngle,
-                                                                                           units::radians_per_second_t encoderVelocity,
-                                                                                           units::volt_t requestedVoltage) const {
+    wpi::units::volt_t SimulatedMotorController::GenericMotorController::ConstrainOutputVoltage(wpi::units::radian_t encoderAngle,
+                                                                                                wpi::units::radians_per_second_t encoderVelocity,
+                                                                                                wpi::units::volt_t requestedVoltage) const {
         const double kCurrentThreshold = 1.2;
 
         const double motorCurrentVelocityRadPerSec = encoderVelocity.value();
@@ -40,8 +40,8 @@ namespace maplesim::simulation::motorsims {
         double limitedVoltage = requestedOutputVoltageVolts;
         const bool currentTooHigh = std::abs(currentAtRequestedVoltageAmps) > (kCurrentThreshold * currentLimitAmps);
         if (currentTooHigh) {
-            const units::ampere_t limitedCurrent{std::copysign(currentLimitAmps, currentAtRequestedVoltageAmps)};
-            limitedVoltage = model_.Voltage(model_.Torque(limitedCurrent), units::radians_per_second_t{motorCurrentVelocityRadPerSec}).value();
+            const wpi::units::ampere_t limitedCurrent{std::copysign(currentLimitAmps, currentAtRequestedVoltageAmps)};
+            limitedVoltage = model_.Voltage(model_.Torque(limitedCurrent), wpi::units::radians_per_second_t{motorCurrentVelocityRadPerSec}).value();
         }
 
         if (std::abs(limitedVoltage) > std::abs(requestedOutputVoltageVolts)) limitedVoltage = requestedOutputVoltageVolts;
@@ -49,12 +49,12 @@ namespace maplesim::simulation::motorsims {
         if (encoderAngle >= forwardSoftwareLimit_ && limitedVoltage > 0) limitedVoltage = 0;
         if (encoderAngle <= reverseSoftwareLimit_ && limitedVoltage < 0) limitedVoltage = 0;
 
-        return units::volt_t{limitedVoltage};
+        return wpi::units::volt_t{limitedVoltage};
     }
 
-    units::volt_t SimulatedMotorController::GenericMotorController::UpdateControlSignal(units::radian_t, units::radians_per_second_t,
-                                                                                        units::radian_t encoderAngle,
-                                                                                        units::radians_per_second_t encoderVelocity) {
+    wpi::units::volt_t SimulatedMotorController::GenericMotorController::UpdateControlSignal(wpi::units::radian_t, wpi::units::radians_per_second_t,
+                                                                                             wpi::units::radian_t encoderAngle,
+                                                                                             wpi::units::radians_per_second_t encoderVelocity) {
         appliedVoltage_ = ConstrainOutputVoltage(encoderAngle, encoderVelocity, requestedVoltage_);
         return appliedVoltage_;
     }

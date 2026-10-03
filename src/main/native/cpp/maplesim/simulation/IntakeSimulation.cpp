@@ -5,36 +5,36 @@
 #include <algorithm>
 #include <utility>
 
-#include <frc/Errors.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Transform2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <units/angle.h>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Transform2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/system/Errors.hpp>
+#include <wpi/units/angle.hpp>
 
 #include "maplesim/simulation/SimulatedArena.h"
 
 namespace maplesim::simulation {
     IntakeSimulation& IntakeSimulation::InTheFrameIntake(const std::string& targetedGamePieceType,
-                                                         drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, units::meter_t width, IntakeSide side,
-                                                         int capacity) {
+                                                         drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, wpi::units::meter_t width,
+                                                         IntakeSide side, int capacity) {
         return InTheFrameIntake(SimulatedArena::GetInstance(), targetedGamePieceType, driveTrainSimulation, width, side, capacity);
     }
 
     IntakeSimulation& IntakeSimulation::InTheFrameIntake(SimulatedArena& arena, const std::string& targetedGamePieceType,
-                                                         drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, units::meter_t width, IntakeSide side,
-                                                         int capacity) {
-        return OverTheBumperIntake(arena, targetedGamePieceType, driveTrainSimulation, width, units::meter_t{0.02}, side, capacity);
+                                                         drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, wpi::units::meter_t width,
+                                                         IntakeSide side, int capacity) {
+        return OverTheBumperIntake(arena, targetedGamePieceType, driveTrainSimulation, width, wpi::units::meter_t{0.02}, side, capacity);
     }
 
     IntakeSimulation& IntakeSimulation::OverTheBumperIntake(const std::string& targetedGamePieceType,
-                                                            drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, units::meter_t width,
-                                                            units::meter_t lengthExtended, IntakeSide side, int capacity) {
+                                                            drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, wpi::units::meter_t width,
+                                                            wpi::units::meter_t lengthExtended, IntakeSide side, int capacity) {
         return OverTheBumperIntake(SimulatedArena::GetInstance(), targetedGamePieceType, driveTrainSimulation, width, lengthExtended, side, capacity);
     }
 
     IntakeSimulation& IntakeSimulation::OverTheBumperIntake(SimulatedArena& arena, const std::string& targetedGamePieceType,
-                                                            drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, units::meter_t width,
-                                                            units::meter_t lengthExtended, IntakeSide side, int capacity) {
+                                                            drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, wpi::units::meter_t width,
+                                                            wpi::units::meter_t lengthExtended, IntakeSide side, int capacity) {
         return Register(arena,
                         std::make_unique<IntakeSimulation>(targetedGamePieceType, driveTrainSimulation,
                                                            GetIntakeRectangle(driveTrainSimulation, width.value(), lengthExtended.value(), side), capacity));
@@ -42,26 +42,27 @@ namespace maplesim::simulation {
 
     physics::Shape IntakeSimulation::GetIntakeRectangle(const drivesims::AbstractDriveTrainSimulation& driveTrainSimulation, double width,
                                                         double lengthExtended, IntakeSide side) {
-        const units::degree_t rotation{side == IntakeSide::kLeft || side == IntakeSide::kRight ? 0.0 : 90.0};
+        const wpi::units::degree_t rotation{side == IntakeSide::kLeft || side == IntakeSide::kRight ? 0.0 : 90.0};
         const double distanceTransformed = lengthExtended / 2 - 0.01;
         const double bumperLengthX = driveTrainSimulation.config.bumperLengthX.value();
         const double bumperWidthY = driveTrainSimulation.config.bumperWidthY.value();
-        frc::Translation2d translation;
+        wpi::math::Translation2d translation;
         switch (side) {
         case IntakeSide::kLeft:
-            translation = frc::Translation2d{units::meter_t{0}, units::meter_t{bumperWidthY / 2 + distanceTransformed}};
+            translation = wpi::math::Translation2d{wpi::units::meter_t{0}, wpi::units::meter_t{bumperWidthY / 2 + distanceTransformed}};
             break;
         case IntakeSide::kRight:
-            translation = frc::Translation2d{units::meter_t{0}, units::meter_t{-bumperWidthY / 2 - distanceTransformed}};
+            translation = wpi::math::Translation2d{wpi::units::meter_t{0}, wpi::units::meter_t{-bumperWidthY / 2 - distanceTransformed}};
             break;
         case IntakeSide::kFront:
-            translation = frc::Translation2d{units::meter_t{bumperLengthX / 2 + distanceTransformed}, units::meter_t{0}};
+            translation = wpi::math::Translation2d{wpi::units::meter_t{bumperLengthX / 2 + distanceTransformed}, wpi::units::meter_t{0}};
             break;
         case IntakeSide::kBack:
-            translation = frc::Translation2d{units::meter_t{-bumperLengthX / 2 - distanceTransformed / 2}, units::meter_t{0}};
+            translation = wpi::math::Translation2d{wpi::units::meter_t{-bumperLengthX / 2 - distanceTransformed / 2}, wpi::units::meter_t{0}};
             break;
         }
-        return physics::Shape::Rectangle(units::meter_t{width}, units::meter_t{lengthExtended}, frc::Transform2d{translation, frc::Rotation2d{rotation}});
+        return physics::Shape::Rectangle(wpi::units::meter_t{width}, wpi::units::meter_t{lengthExtended},
+                                         wpi::math::Transform2d{translation, wpi::math::Rotation2d{rotation}});
     }
 
     physics::FixtureMaterial IntakeSimulation::MasslessMaterial() {
@@ -76,7 +77,7 @@ namespace maplesim::simulation {
         , capacity_(capacity)
         , driveTrainSimulation_(driveTrainSimulation)
         , targetedGamePieceType_(std::move(targetedGamePieceType)) {
-        if (capacity > 100) throw FRC_MakeError(frc::err::Error, "capacity too large, max is 100");
+        if (capacity > 100) throw WPILIB_MakeError(wpi::err::Error, "capacity too large, max is 100");
     }
 
     IntakeSimulation& IntakeSimulation::Register(std::unique_ptr<IntakeSimulation> intakeSimulation) {

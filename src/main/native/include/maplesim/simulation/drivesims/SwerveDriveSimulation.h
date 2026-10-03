@@ -3,17 +3,17 @@
 #include <array>
 #include <memory>
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
-#include <frc/kinematics/SwerveDriveKinematics.h>
-#include <units/acceleration.h>
-#include <units/angular_acceleration.h>
-#include <units/angular_velocity.h>
-#include <units/current.h>
-#include <units/force.h>
-#include <units/length.h>
-#include <units/velocity.h>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/math/kinematics/SwerveDriveKinematics.hpp>
+#include <wpi/units/acceleration.hpp>
+#include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/force.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "maplesim/simulation/drivesims/AbstractDriveTrainSimulation.h"
 #include "maplesim/simulation/drivesims/GyroSimulation.h"
@@ -26,15 +26,15 @@ namespace maplesim::simulation::drivesims {
     public:
         using SwerveModuleSimulations = std::array<std::unique_ptr<SwerveModuleSimulation>, configs::kSwerveModuleCount>;
 
-        SwerveDriveSimulation(configs::DriveTrainSimulationConfig config, const frc::Pose2d& initialPoseOnField);
+        SwerveDriveSimulation(configs::DriveTrainSimulationConfig config, const wpi::math::Pose2d& initialPoseOnField);
 
         void SimulationSubTick() override;
 
-        [[nodiscard]] units::meters_per_second_t MaxLinearVelocity() const;
-        [[nodiscard]] units::meters_per_second_squared_t MaxLinearAcceleration(units::ampere_t statorCurrentLimit) const;
-        [[nodiscard]] units::meter_t DriveBaseRadius() const { return config.DriveBaseRadius(); }
-        [[nodiscard]] units::radians_per_second_t MaxAngularVelocity() const;
-        [[nodiscard]] units::radians_per_second_squared_t MaxAngularAcceleration(units::ampere_t statorCurrentLimit) const;
+        [[nodiscard]] wpi::units::meters_per_second_t MaxLinearVelocity() const;
+        [[nodiscard]] wpi::units::meters_per_second_squared_t MaxLinearAcceleration(wpi::units::ampere_t statorCurrentLimit) const;
+        [[nodiscard]] wpi::units::meter_t DriveBaseRadius() const { return config.DriveBaseRadius(); }
+        [[nodiscard]] wpi::units::radians_per_second_t MaxAngularVelocity() const;
+        [[nodiscard]] wpi::units::radians_per_second_squared_t MaxAngularAcceleration(wpi::units::ampere_t statorCurrentLimit) const;
 
         [[nodiscard]] const SwerveModuleSimulations& GetModules() const { return moduleSimulations_; }
         [[nodiscard]] GyroSimulation& GetGyroSimulation() { return *gyroSimulation_; }
@@ -44,16 +44,16 @@ namespace maplesim::simulation::drivesims {
         virtual void SimulateChassisFrictionTorque();
         virtual void SimulateModulePropellingForces();
 
-        [[nodiscard]] frc::ChassisSpeeds GetDesiredSpeed() const;
-        [[nodiscard]] frc::ChassisSpeeds GetModuleSpeeds() const;
+        [[nodiscard]] wpi::math::ChassisVelocities GetDesiredSpeed() const;
+        [[nodiscard]] wpi::math::ChassisVelocities GetModuleSpeeds() const;
 
-        const std::array<frc::Translation2d, configs::kSwerveModuleCount> moduleTranslations_;
+        const std::array<wpi::math::Translation2d, configs::kSwerveModuleCount> moduleTranslations_;
         const std::unique_ptr<GyroSimulation> gyroSimulation_;
-        const frc::SwerveDriveKinematics<configs::kSwerveModuleCount> kinematics_;
+        const wpi::math::SwerveDriveKinematics<configs::kSwerveModuleCount> kinematics_;
 
     private:
         SwerveModuleSimulations moduleSimulations_;
-        const units::newton_t gravityForceOnEachModule_;
-        frc::Translation2d previousModuleSpeedsFieldRelative_;
+        const wpi::units::newton_t gravityForceOnEachModule_;
+        wpi::math::Translation2d previousModuleSpeedsFieldRelative_;
     };
 } // namespace maplesim::simulation::drivesims

@@ -7,11 +7,11 @@ ext.licenseFiles = files(
     "$rootDir/WPILIB-LICENSE.md"
 )
 
-def pubVersion = project.findProperty('publishVersion') ?: '0.1.0'
+def pubVersion = project.findProperty('publishVersion') ?: '0.2.0-alpha-1'
 def artifactGroupId = project.findProperty('publishGroup') ?: 'com.ethanye.maplesim'
 def baseArtifactId = 'maple-sim'
 def vendordepMavenUrl = project.findProperty('vendordepMavenUrl') ?: 'https://example.invalid/maple-sim-cpp/maven'
-def vendordepJsonUrl = project.findProperty('vendordepJsonUrl') ?: 'https://example.invalid/maple-sim-cpp/MapleSimCpp.json'
+def vendordepJsonUrl = project.findProperty('vendordepJsonUrl') ?: 'https://example.invalid/maple-sim-cpp/MapleSimCpp-2027.json'
 def templateVendorFile = 'MapleSimCpp.json'
 def outputsFolder = file("$buildDir/outputs")
 def releasesRepoUrl = file("$buildDir/repos/releases")

@@ -4,33 +4,33 @@
 
 #include <memory>
 
-#include <frc/Errors.h>
-#include <units/length.h>
-#include <units/moment_of_inertia.h>
-#include <units/voltage.h>
+#include <wpi/system/Errors.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include "maplesim/simulation/drivesims/GyroSimulation.h"
 
 namespace maplesim::simulation::drivesims::COTS {
     namespace {
         [[noreturn]] void ThrowUnknownGearingLevel(int gearRatioLevel) {
-            throw FRC_MakeError(frc::err::Error, "Unknown gearing level: {}", gearRatioLevel);
+            throw WPILIB_MakeError(wpi::err::Error, "Unknown gearing level: {}", gearRatioLevel);
         }
 
         [[noreturn]] void ThrowUnknownPinionSize(int pinionSize) {
-            throw FRC_MakeError(frc::err::Error, "Unknown pinion size: {}", pinionSize);
+            throw WPILIB_MakeError(wpi::err::Error, "Unknown pinion size: {}", pinionSize);
         }
 
-        [[nodiscard]] configs::SwerveModuleSimulationConfig MakeTypicalModuleConfig(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double driveGearRatio,
-                                                                                    double steerGearRatio, double wheelCOF) {
+        [[nodiscard]] configs::SwerveModuleSimulationConfig MakeTypicalModuleConfig(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor,
+                                                                                    double driveGearRatio, double steerGearRatio, double wheelCOF) {
             return configs::SwerveModuleSimulationConfig{driveMotor,
                                                          steerMotor,
                                                          driveGearRatio,
                                                          steerGearRatio,
-                                                         units::volt_t{0.1},
-                                                         units::volt_t{0.2},
-                                                         units::inch_t{2},
-                                                         units::kilogram_square_meter_t{0.03},
+                                                         wpi::units::volt_t{0.1},
+                                                         wpi::units::volt_t{0.2},
+                                                         wpi::units::inch_t{2},
+                                                         wpi::units::kilogram_square_meter_t{0.03},
                                                          wheelCOF};
         }
 
@@ -310,55 +310,64 @@ namespace maplesim::simulation::drivesims::COTS {
         }
     } // namespace
 
-    configs::SwerveModuleSimulationConfig OfMark4(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
+    configs::SwerveModuleSimulationConfig OfMark4(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, Mark4DriveGearRatio(gearRatioLevel), 12.8, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfMark4i(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
+    configs::SwerveModuleSimulationConfig OfMark4i(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, Mark4iDriveGearRatio(gearRatioLevel), 150.0 / 7.0, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfMark4n(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
+    configs::SwerveModuleSimulationConfig OfMark4n(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, Mark4nDriveGearRatio(gearRatioLevel), 18.75, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfMark5n(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
+    configs::SwerveModuleSimulationConfig OfMark5n(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, Mark5DriveGearRatio(gearRatioLevel), 287.0 / 11.0, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfMark5i(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
+    configs::SwerveModuleSimulationConfig OfMark5i(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, Mark5DriveGearRatio(gearRatioLevel), 26.0, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfSwerveX(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel,
+    configs::SwerveModuleSimulationConfig OfSwerveX(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel,
                                                     double firstStageRatio) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, firstStageRatio * SwerveXSecondStageRatio(gearRatioLevel), 11.3142, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfSwerveXFlipped(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel,
+    configs::SwerveModuleSimulationConfig OfSwerveXFlipped(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel,
                                                            int pinionSize) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, SwerveXFlippedDriveGearRatio(gearRatioLevel, pinionSize), 13.3714, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfSwerveXS(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel, int pinionSize) {
+    configs::SwerveModuleSimulationConfig OfSwerveXS(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel,
+                                                     int pinionSize) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, SwerveXSDriveGearRatio(gearRatioLevel, pinionSize), 41.25, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfSwerveX2(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel, int pinionSize) {
+    configs::SwerveModuleSimulationConfig OfSwerveX2(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel,
+                                                     int pinionSize) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, SwerveX2DriveGearRatio(gearRatioLevel, pinionSize), 12.1, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfSwerveX2S(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel, int pinionSize) {
+    configs::SwerveModuleSimulationConfig OfSwerveX2S(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel,
+                                                      int pinionSize) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, SwerveX2SDriveGearRatio(gearRatioLevel, pinionSize), 25.9, wheelCOF);
     }
 
-    configs::SwerveModuleSimulationConfig OfMAXSwerve(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
-        return configs::SwerveModuleSimulationConfig{
-            driveMotor,         steerMotor,         MAXSwerveDriveGearRatio(gearRatioLevel), 9424.0 / 203.0, units::volt_t{0.1},
-            units::volt_t{0.1}, units::inch_t{1.5}, units::kilogram_square_meter_t{0.02},    wheelCOF};
+    configs::SwerveModuleSimulationConfig OfMAXSwerve(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
+        return configs::SwerveModuleSimulationConfig{driveMotor,
+                                                     steerMotor,
+                                                     MAXSwerveDriveGearRatio(gearRatioLevel),
+                                                     9424.0 / 203.0,
+                                                     wpi::units::volt_t{0.1},
+                                                     wpi::units::volt_t{0.1},
+                                                     wpi::units::inch_t{1.5},
+                                                     wpi::units::kilogram_square_meter_t{0.02},
+                                                     wheelCOF};
     }
 
-    configs::SwerveModuleSimulationConfig OfThriftySwerve(frc::DCMotor driveMotor, frc::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
+    configs::SwerveModuleSimulationConfig OfThriftySwerve(wpi::math::DCMotor driveMotor, wpi::math::DCMotor steerMotor, double wheelCOF, int gearRatioLevel) {
         return MakeTypicalModuleConfig(driveMotor, steerMotor, ThriftySwerveDriveGearRatio(gearRatioLevel), 25, wheelCOF);
     }
 

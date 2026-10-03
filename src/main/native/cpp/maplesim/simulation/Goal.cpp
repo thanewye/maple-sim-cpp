@@ -6,35 +6,35 @@
 #include <numbers>
 #include <utility>
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
 
 namespace maplesim::simulation {
-    frc::Rotation3d Goal::FlipRotation(const frc::Rotation3d& toFlip) {
-        return frc::Rotation3d{units::radian_t{0}, -toFlip.Y(), toFlip.Z() + units::radian_t{std::numbers::pi}};
+    wpi::math::Rotation3d Goal::FlipRotation(const wpi::math::Rotation3d& toFlip) {
+        return wpi::math::Rotation3d{wpi::units::radian_t{0}, -toFlip.Y(), toFlip.Z() + wpi::units::radian_t{std::numbers::pi}};
     }
 
-    Goal::PositionChecker Goal::Box(const frc::Rectangle2d& xyBox, double minZMeters, double maxZMeters) {
-        return [xyBox, minZMeters, maxZMeters](const frc::Translation3d& position) {
+    Goal::PositionChecker Goal::Box(const wpi::math::Rectangle2d& xyBox, double minZMeters, double maxZMeters) {
+        return [xyBox, minZMeters, maxZMeters](const wpi::math::Translation3d& position) {
             return xyBox.Contains(position.ToTranslation2d()) && position.Z().value() >= minZMeters && position.Z().value() <= maxZMeters;
         };
     }
 
-    Goal::RotationChecker Goal::AbsoluteAngle(const frc::Rotation3d& expectedAngle, units::degree_t tolerance) {
+    Goal::RotationChecker Goal::AbsoluteAngle(const wpi::math::Rotation3d& expectedAngle, wpi::units::degree_t tolerance) {
         return [expectedAngle, tolerance](const gamepieces::GamePiece& gamePiece) {
-            const frc::Rotation3d actualRotation = gamePiece.GetPose3d().Rotation();
-            const frc::Rotation3d normalDiff = actualRotation - expectedAngle;
-            const frc::Rotation3d flippedDiff = FlipRotation(actualRotation) - expectedAngle;
+            const wpi::math::Rotation3d actualRotation = gamePiece.GetPose3d().Rotation();
+            const wpi::math::Rotation3d normalDiff = actualRotation.RelativeTo(expectedAngle);
+            const wpi::math::Rotation3d flippedDiff = FlipRotation(actualRotation).RelativeTo(expectedAngle);
 
-            const units::degree_t normalAngle = frc::Rotation3d{units::radian_t{0}, normalDiff.Y(), normalDiff.Z()}.Angle();
-            const units::degree_t flippedAngle = frc::Rotation3d{units::radian_t{0}, flippedDiff.Y(), flippedDiff.Z()}.Angle();
+            const wpi::units::degree_t normalAngle = wpi::math::Rotation3d{wpi::units::radian_t{0}, normalDiff.Y(), normalDiff.Z()}.Angle();
+            const wpi::units::degree_t flippedAngle = wpi::math::Rotation3d{wpi::units::radian_t{0}, flippedDiff.Y(), flippedDiff.Z()}.Angle();
 
             return normalAngle < tolerance || flippedAngle < tolerance;
         };
     }
 
-    Goal::RotationChecker Goal::PitchOnly(double expectedPitchRadians, units::radian_t tolerance) {
+    Goal::RotationChecker Goal::PitchOnly(double expectedPitchRadians, wpi::units::radian_t tolerance) {
         return [expectedPitchRadians, tolerance](const gamepieces::GamePiece& gamePiece) {
             const double actualPitch = gamePiece.GetPose3d().Rotation().Y().value();
             return std::abs(actualPitch - expectedPitchRadians) < tolerance.value();
@@ -45,9 +45,9 @@ namespace maplesim::simulation {
         return [](const gamepieces::GamePiece&) { return true; };
     }
 
-    Goal::Goal(SimulatedArena& arena, units::meter_t xDimension, units::meter_t yDimension, units::meter_t height, std::string gamePieceType,
-               const frc::Translation3d& position, bool isBlue, int max, bool allowGrounded)
-        : xyBox_(frc::Pose2d{position.X(), position.Y(), frc::Rotation2d{}}, xDimension, yDimension)
+    Goal::Goal(SimulatedArena& arena, wpi::units::meter_t xDimension, wpi::units::meter_t yDimension, wpi::units::meter_t height, std::string gamePieceType,
+               const wpi::math::Translation3d& position, bool isBlue, int max, bool allowGrounded)
+        : xyBox_(wpi::math::Pose2d{position.X(), position.Y(), wpi::math::Rotation2d{}}, xDimension, yDimension)
         , height_(height)
         , elevation_(position.Z())
         , gamePieceType_(std::move(gamePieceType))
@@ -62,8 +62,8 @@ namespace maplesim::simulation {
         , positionChecker_(Box(xyBox_, minZMeters_, maxZMeters_))
         , velocityValidator_([](const gamepieces::GamePiece&) { return true; }) {}
 
-    Goal::Goal(SimulatedArena& arena, units::meter_t xDimension, units::meter_t yDimension, units::meter_t height, std::string gamePieceType,
-               const frc::Translation3d& position, bool isBlue, bool allowsGrounded)
+    Goal::Goal(SimulatedArena& arena, wpi::units::meter_t xDimension, wpi::units::meter_t yDimension, wpi::units::meter_t height, std::string gamePieceType,
+               const wpi::math::Translation3d& position, bool isBlue, bool allowsGrounded)
         : Goal(arena, xDimension, yDimension, height, std::move(gamePieceType), position, isBlue, 99999, allowsGrounded) {}
 
     void Goal::SimulationSubTick([[maybe_unused]] int subTickNum) {
@@ -81,7 +81,7 @@ namespace maplesim::simulation {
         }
     }
 
-    void Goal::SetNeededAngle(const frc::Rotation3d& angle, units::degree_t angleTolerance) {
+    void Goal::SetNeededAngle(const wpi::math::Rotation3d& angle, wpi::units::degree_t angleTolerance) {
         rotationChecker_ = AbsoluteAngle(angle, angleTolerance);
     }
 
@@ -123,7 +123,7 @@ namespace maplesim::simulation {
     }
 
     bool Goal::CheckCollision(const gamepieces::GamePiece& gamePiece) const {
-        const frc::Pose3d pose = gamePiece.GetPose3d();
+        const wpi::math::Pose3d pose = gamePiece.GetPose3d();
 
         return xyBox_.Contains(pose.Translation().ToTranslation2d()) && pose.Z().value() >= minZMeters_ && pose.Z().value() <= maxZMeters_;
     }

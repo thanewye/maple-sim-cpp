@@ -1,7 +1,7 @@
 #pragma once
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
 
 #include "maplesim/physics/Body.h"
 #include "maplesim/simulation/drivesims/configs/DriveTrainSimulationConfig.h"
@@ -14,19 +14,19 @@ namespace maplesim::simulation::drivesims {
         static constexpr double kBumperCoefficientOfRestitution = 0.08;
 
         /** Teleports the chassis and stops its linear motion; angular velocity is kept. */
-        void SetSimulationWorldPose(const frc::Pose2d& robotPose);
+        void SetSimulationWorldPose(const wpi::math::Pose2d& robotPose);
         /** Sets the field-relative chassis velocity. */
-        void SetRobotSpeeds(const frc::ChassisSpeeds& givenSpeeds);
+        void SetRobotSpeeds(const wpi::math::ChassisVelocities& givenSpeeds);
 
         virtual void SimulationSubTick() = 0;
 
-        [[nodiscard]] frc::Pose2d GetSimulatedDriveTrainPose() const { return GetPose(); }
-        [[nodiscard]] frc::ChassisSpeeds GetDriveTrainSimulatedChassisSpeedsRobotRelative() const;
-        [[nodiscard]] frc::ChassisSpeeds GetDriveTrainSimulatedChassisSpeedsFieldRelative() const { return GetVelocity(); }
+        [[nodiscard]] wpi::math::Pose2d GetSimulatedDriveTrainPose() const { return GetPose(); }
+        [[nodiscard]] wpi::math::ChassisVelocities GetDriveTrainSimulatedChassisSpeedsRobotRelative() const;
+        [[nodiscard]] wpi::math::ChassisVelocities GetDriveTrainSimulatedChassisSpeedsFieldRelative() const { return GetVelocity(); }
 
         const configs::DriveTrainSimulationConfig config;
 
     protected:
-        AbstractDriveTrainSimulation(configs::DriveTrainSimulationConfig config, const frc::Pose2d& initialPoseOnField);
+        AbstractDriveTrainSimulation(configs::DriveTrainSimulationConfig config, const wpi::math::Pose2d& initialPoseOnField);
     };
 } // namespace maplesim::simulation::drivesims

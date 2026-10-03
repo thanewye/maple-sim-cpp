@@ -3,12 +3,12 @@
 #include <functional>
 #include <string>
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Pose3d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/geometry/Translation3d.h>
-#include <units/length.h>
-#include <units/mass.h>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Pose3d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 
 #include "maplesim/physics/Body.h"
 #include "maplesim/physics/Shape.h"
@@ -24,24 +24,24 @@ namespace maplesim::simulation::gamepieces {
         struct GamePieceInfo {
             std::string type;
             physics::Shape shape;
-            units::meter_t gamePieceHeight;
-            units::kilogram_t gamePieceMass;
+            wpi::units::meter_t gamePieceHeight;
+            wpi::units::kilogram_t gamePieceMass;
             double linearDamping;
             double angularDamping;
             double coefficientOfRestitution;
         };
 
-        GamePieceOnFieldSimulation(const GamePieceInfo& info, const frc::Pose2d& initialPose);
-        GamePieceOnFieldSimulation(const GamePieceInfo& info, std::function<double()> zPositionSupplier, const frc::Pose2d& initialPose,
-                                   const frc::Translation2d& initialVelocityMPS);
+        GamePieceOnFieldSimulation(const GamePieceInfo& info, const wpi::math::Pose2d& initialPose);
+        GamePieceOnFieldSimulation(const GamePieceInfo& info, std::function<double()> zPositionSupplier, const wpi::math::Pose2d& initialPose,
+                                   const wpi::math::Translation2d& initialVelocityMPS);
 
-        [[nodiscard]] frc::Pose2d GetPoseOnField() const { return GetPose(); }
-        [[nodiscard]] frc::Pose3d GetPose3d() const override;
+        [[nodiscard]] wpi::math::Pose2d GetPoseOnField() const { return GetPose(); }
+        [[nodiscard]] wpi::math::Pose3d GetPose3d() const override;
 
         virtual void OnIntake([[maybe_unused]] const std::string& intakeTargetGamePieceType) {}
 
         [[nodiscard]] const std::string& GetType() const override { return type; }
-        [[nodiscard]] frc::Translation3d GetVelocity3dMPS() const override;
+        [[nodiscard]] wpi::math::Translation3d GetVelocity3dMPS() const override;
         [[nodiscard]] bool IsGrounded() const override { return true; }
         void TriggerHitTargetCallBack() override {}
 

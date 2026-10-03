@@ -4,16 +4,16 @@
 #include <string>
 #include <vector>
 
-#include <frc/Timer.h>
-#include <frc/geometry/Pose3d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Rotation3d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/geometry/Translation3d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/velocity.h>
+#include <wpi/math/geometry/Pose3d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/system/Timer.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "maplesim/simulation/gamepieces/GamePiece.h"
 #include "maplesim/simulation/gamepieces/GamePieceOnFieldSimulation.h"
@@ -26,17 +26,17 @@ namespace maplesim::simulation::gamepieces {
     /** A launched game piece following a closed-form ballistic trajectory until it hits its target, the ground, or leaves the field. */
     class GamePieceProjectile : public GamePiece {
     public:
-        using TrajectoryDisplayCallBack = std::function<void(const std::vector<frc::Pose3d>&)>;
+        using TrajectoryDisplayCallBack = std::function<void(const std::vector<wpi::math::Pose3d>&)>;
 
         static constexpr double kGravity = 11;
 
-        GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const frc::Translation2d& robotPosition,
-                            const frc::Translation2d& shooterPositionOnRobot, const frc::ChassisSpeeds& chassisSpeedsFieldRelative,
-                            const frc::Rotation2d& shooterFacing, units::meter_t initialHeight, units::meters_per_second_t launchingSpeed,
-                            units::radian_t shooterAngle);
-        GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const frc::Translation2d& initialPosition,
-                            const frc::Translation2d& initialLaunchingVelocityMPS, double initialHeight, double initialVerticalSpeedMPS,
-                            const frc::Rotation3d& gamePieceRotation);
+        GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const wpi::math::Translation2d& robotPosition,
+                            const wpi::math::Translation2d& shooterPositionOnRobot, const wpi::math::ChassisVelocities& chassisSpeedsFieldRelative,
+                            const wpi::math::Rotation2d& shooterFacing, wpi::units::meter_t initialHeight, wpi::units::meters_per_second_t launchingSpeed,
+                            wpi::units::radian_t shooterAngle);
+        GamePieceProjectile(const GamePieceOnFieldSimulation::GamePieceInfo& info, const wpi::math::Translation2d& initialPosition,
+                            const wpi::math::Translation2d& initialLaunchingVelocityMPS, double initialHeight, double initialVerticalSpeedMPS,
+                            const wpi::math::Rotation3d& gamePieceRotation);
 
         /** Previews the trajectory for the display callbacks and starts the flight timer. */
         void Launch();
@@ -48,16 +48,16 @@ namespace maplesim::simulation::gamepieces {
         /** Clears the displayed trajectory. */
         GamePieceProjectile& CleanUp();
 
-        [[nodiscard]] frc::Pose3d GetPose3d() const override;
-        [[nodiscard]] frc::Translation3d GetVelocity3dMPS() const override;
+        [[nodiscard]] wpi::math::Pose3d GetPose3d() const override;
+        [[nodiscard]] wpi::math::Translation3d GetVelocity3dMPS() const override;
 
         void AddGamePieceAfterTouchGround(SimulatedArena& simulatedArena);
         static void UpdateGamePieceProjectiles(SimulatedArena& simulatedArena, const std::vector<GamePieceProjectile*>& gamePieceProjectiles);
 
         GamePieceProjectile& EnableBecomesGamePieceOnFieldAfterTouchGround();
         GamePieceProjectile& DisableBecomesGamePieceOnFieldAfterTouchGround();
-        GamePieceProjectile& WithTargetPosition(std::function<frc::Translation3d()> targetPositionSupplier);
-        GamePieceProjectile& WithTargetTolerance(const frc::Translation3d& tolerance);
+        GamePieceProjectile& WithTargetPosition(std::function<wpi::math::Translation3d()> targetPositionSupplier);
+        GamePieceProjectile& WithTargetTolerance(const wpi::math::Translation3d& tolerance);
         GamePieceProjectile& WithHitTargetCallBack(std::function<void()> hitTargetCallBack);
         GamePieceProjectile& WithProjectileTrajectoryDisplayCallBack(TrajectoryDisplayCallBack projectileTrajectoryDisplayCallBack);
         GamePieceProjectile& WithProjectileTrajectoryDisplayCallBack(TrajectoryDisplayCallBack projectileTrajectoryDisplayCallBackHitTarget,
@@ -72,29 +72,29 @@ namespace maplesim::simulation::gamepieces {
         const std::string gamePieceType;
 
     protected:
-        [[nodiscard]] frc::Translation3d GetPositionAtTime(double t) const;
+        [[nodiscard]] wpi::math::Translation3d GetPositionAtTime(double t) const;
 
         const GamePieceOnFieldSimulation::GamePieceInfo info_;
-        const frc::Translation2d initialPosition_;
-        const frc::Translation2d initialLaunchingVelocityMPS_;
+        const wpi::math::Translation2d initialPosition_;
+        const wpi::math::Translation2d initialLaunchingVelocityMPS_;
         const double initialHeight_;
         const double initialVerticalSpeedMPS_;
-        const frc::Rotation3d gamePieceRotation_;
-        frc::Timer launchedTimer_;
+        const wpi::math::Rotation3d gamePieceRotation_;
+        wpi::Timer launchedTimer_;
         bool becomesGamePieceOnGroundAfterTouchGround_ = false;
 
     private:
-        [[nodiscard]] static frc::Translation2d CalculateInitialProjectileVelocityMPS(const frc::Translation2d& shooterPositionOnRobot,
-                                                                                      const frc::ChassisSpeeds& chassisSpeeds,
-                                                                                      const frc::Rotation2d& chassisFacing, double groundSpeedMPS);
+        [[nodiscard]] static wpi::math::Translation2d CalculateInitialProjectileVelocityMPS(const wpi::math::Translation2d& shooterPositionOnRobot,
+                                                                                            const wpi::math::ChassisVelocities& chassisSpeeds,
+                                                                                            const wpi::math::Rotation2d& chassisFacing, double groundSpeedMPS);
         [[nodiscard]] bool IsOutOfField(double time) const;
-        [[nodiscard]] frc::Translation3d GetVelocityMPSAtTime(double t) const;
+        [[nodiscard]] wpi::math::Translation3d GetVelocityMPSAtTime(double t) const;
 
-        TrajectoryDisplayCallBack projectileTrajectoryDisplayCallBackHitTarget_ = [](const std::vector<frc::Pose3d>&) {};
-        TrajectoryDisplayCallBack projectileTrajectoryDisplayCallBackMiss_ = [](const std::vector<frc::Pose3d>&) {};
-        frc::Translation3d tolerance_{units::meter_t{0.2}, units::meter_t{0.2}, units::meter_t{0.2}};
-        std::function<frc::Translation3d()> targetPositionSupplier_ = [] {
-            return frc::Translation3d{units::meter_t{0}, units::meter_t{0}, units::meter_t{-100}};
+        TrajectoryDisplayCallBack projectileTrajectoryDisplayCallBackHitTarget_ = [](const std::vector<wpi::math::Pose3d>&) {};
+        TrajectoryDisplayCallBack projectileTrajectoryDisplayCallBackMiss_ = [](const std::vector<wpi::math::Pose3d>&) {};
+        wpi::math::Translation3d tolerance_{wpi::units::meter_t{0.2}, wpi::units::meter_t{0.2}, wpi::units::meter_t{0.2}};
+        std::function<wpi::math::Translation3d()> targetPositionSupplier_ = [] {
+            return wpi::math::Translation3d{wpi::units::meter_t{0}, wpi::units::meter_t{0}, wpi::units::meter_t{-100}};
         };
         std::function<void()> hitTargetCallBack_ = [] {};
         double heightAsTouchGround_ = 0.5;

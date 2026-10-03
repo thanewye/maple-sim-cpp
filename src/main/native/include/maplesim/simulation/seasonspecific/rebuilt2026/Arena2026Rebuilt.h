@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 
-#include <frc/geometry/Pose3d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <networktables/BooleanTopic.h>
-#include <networktables/DoubleTopic.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/velocity.h>
+#include <wpi/math/geometry/Pose3d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/nt/BooleanTopic.hpp>
+#include <wpi/nt/DoubleTopic.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
 
 #include "maplesim/simulation/SimulatedArena.h"
 
@@ -60,11 +60,12 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
         /** Test-only: reseeds the generator behind RandomInRange and the initial clock side so scenarios are reproducible. */
         static void SetSeed(std::uint64_t seed);
 
-        void AddPieceWithVariance(const frc::Translation2d& piecePose, const frc::Rotation2d& yaw, units::meter_t height, units::meters_per_second_t speed,
-                                  units::radian_t pitch, double xVariance, double yVariance, double yawVariance, double speedVariance, double pitchVariance);
+        void AddPieceWithVariance(const wpi::math::Translation2d& piecePose, const wpi::math::Rotation2d& yaw, wpi::units::meter_t height,
+                                  wpi::units::meters_per_second_t speed, wpi::units::radian_t pitch, double xVariance, double yVariance, double yawVariance,
+                                  double speedVariance, double pitchVariance);
 
         void PlaceGamePiecesOnField() override;
-        [[nodiscard]] std::vector<frc::Pose3d> GetGamePiecesPosesByType(const std::string& type) const override;
+        [[nodiscard]] std::vector<wpi::math::Pose3d> GetGamePiecesPosesByType(const std::string& type) const override;
         void SimulationSubTick(int tickNum) override;
 
         [[nodiscard]] bool IsActive(bool isBlue) const;
@@ -72,24 +73,24 @@ namespace maplesim::simulation::seasonspecific::rebuilt2026 {
 
         void OutpostDump(bool isBlue);
         void OutpostThrowForGoal(bool isBlue);
-        void OutpostThrow(bool isBlue, const frc::Rotation2d& throwYaw, units::radian_t throwPitch, units::meters_per_second_t speed);
+        void OutpostThrow(bool isBlue, const wpi::math::Rotation2d& throwYaw, wpi::units::radian_t throwPitch, wpi::units::meters_per_second_t speed);
 
         void SetEfficiencyMode(bool efficiencyMode);
         [[nodiscard]] bool GetEfficiencyMode() const { return isInEfficiencyMode_; }
 
     protected:
-        static constexpr frc::Translation2d kCenterPieceBottomRightCorner{units::meter_t{7.35737}, units::meter_t{1.724406}};
-        static constexpr frc::Translation2d kRedDepotBottomRightCorner{units::meter_t{0.02}, units::meter_t{5.53}};
-        static constexpr frc::Translation2d kBlueDepotBottomRightCorner{units::meter_t{16.0274}, units::meter_t{1.646936}};
+        static constexpr wpi::math::Translation2d kCenterPieceBottomRightCorner{wpi::units::meter_t{7.35737}, wpi::units::meter_t{1.724406}};
+        static constexpr wpi::math::Translation2d kRedDepotBottomRightCorner{wpi::units::meter_t{0.02}, wpi::units::meter_t{5.53}};
+        static constexpr wpi::math::Translation2d kBlueDepotBottomRightCorner{wpi::units::meter_t{16.0274}, wpi::units::meter_t{1.646936}};
 
         bool shouldClock_ = true;
 
         double nextClockSwapTime_ = 0;
         bool blueIsOnClock_;
 
-        nt::DoublePublisher phaseClockPublisher_;
-        nt::BooleanPublisher redActivePublisher_;
-        nt::BooleanPublisher blueActivePublisher_;
+        wpi::nt::DoublePublisher phaseClockPublisher_;
+        wpi::nt::BooleanPublisher redActivePublisher_;
+        wpi::nt::BooleanPublisher blueActivePublisher_;
 
         RebuiltHub* blueHub_;
         RebuiltHub* redHub_;

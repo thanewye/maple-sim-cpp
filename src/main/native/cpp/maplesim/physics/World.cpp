@@ -79,7 +79,7 @@ namespace maplesim::physics {
         RemoveAllBodies();
     }
 
-    void World::Step(units::second_t dt) {
+    void World::Step(wpi::units::second_t dt) {
         for (Body* body : bodies_)
             body->IntegrateAppliedLoads(dt);
         b2World_->Step(static_cast<float>(dt.value()), settings_.velocityIterations, settings_.positionIterations);

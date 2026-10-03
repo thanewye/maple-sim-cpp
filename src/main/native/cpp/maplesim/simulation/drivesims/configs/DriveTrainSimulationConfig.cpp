@@ -6,8 +6,8 @@
 #include <string>
 #include <utility>
 
-#include <frc/system/plant/DCMotor.h>
-#include <units/math.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/math.hpp>
 
 #include "maplesim/simulation/drivesims/COTS.h"
 #include "maplesim/simulation/drivesims/GyroSimulation.h"
@@ -15,8 +15,9 @@
 #include "maplesim/simulation/drivesims/configs/BoundingCheck.h"
 
 namespace maplesim::simulation::drivesims::configs {
-    DriveTrainSimulationConfig::DriveTrainSimulationConfig(units::kilogram_t robotMass, units::meter_t bumperLengthX, units::meter_t bumperWidthY,
-                                                           units::meter_t trackLengthX, units::meter_t trackWidthY, GyroSimulationFactory gyroSimulationFactory,
+    DriveTrainSimulationConfig::DriveTrainSimulationConfig(wpi::units::kilogram_t robotMass, wpi::units::meter_t bumperLengthX,
+                                                           wpi::units::meter_t bumperWidthY, wpi::units::meter_t trackLengthX, wpi::units::meter_t trackWidthY,
+                                                           GyroSimulationFactory gyroSimulationFactory,
                                                            SwerveModuleSimulationFactory swerveModuleSimulationFactory)
         : robotMass(robotMass)
         , bumperLengthX(bumperLengthX)
@@ -28,8 +29,9 @@ namespace maplesim::simulation::drivesims::configs {
         CheckBumperSize();
     }
 
-    DriveTrainSimulationConfig::DriveTrainSimulationConfig(units::kilogram_t robotMass, units::meter_t bumperLengthX, units::meter_t bumperWidthY,
-                                                           units::meter_t trackLengthX, units::meter_t trackWidthY, GyroSimulationFactory gyroSimulationFactory,
+    DriveTrainSimulationConfig::DriveTrainSimulationConfig(wpi::units::kilogram_t robotMass, wpi::units::meter_t bumperLengthX,
+                                                           wpi::units::meter_t bumperWidthY, wpi::units::meter_t trackLengthX, wpi::units::meter_t trackWidthY,
+                                                           GyroSimulationFactory gyroSimulationFactory,
                                                            std::array<SwerveModuleSimulationFactory, kSwerveModuleCount> swerveModuleSimulationFactories)
         : robotMass(robotMass)
         , bumperLengthX(bumperLengthX)
@@ -42,38 +44,38 @@ namespace maplesim::simulation::drivesims::configs {
     }
 
     DriveTrainSimulationConfig DriveTrainSimulationConfig::Default() {
-        return DriveTrainSimulationConfig{units::kilogram_t{45},
-                                          units::meter_t{0.76},
-                                          units::meter_t{0.76},
-                                          units::meter_t{0.52},
-                                          units::meter_t{0.52},
+        return DriveTrainSimulationConfig{wpi::units::kilogram_t{45},
+                                          wpi::units::meter_t{0.76},
+                                          wpi::units::meter_t{0.76},
+                                          wpi::units::meter_t{0.52},
+                                          wpi::units::meter_t{0.52},
                                           COTS::OfPigeon2(),
-                                          COTS::OfMark4(frc::DCMotor::Falcon500(1), frc::DCMotor::Falcon500(1), COTS::Wheels::kColsons.cof, 2)};
+                                          COTS::OfMark4(wpi::math::DCMotor::Falcon500(1), wpi::math::DCMotor::Falcon500(1), COTS::Wheels::kColsons.cof, 2)};
     }
 
-    DriveTrainSimulationConfig& DriveTrainSimulationConfig::WithRobotMass(units::kilogram_t robotMass) {
+    DriveTrainSimulationConfig& DriveTrainSimulationConfig::WithRobotMass(wpi::units::kilogram_t robotMass) {
         this->robotMass = robotMass;
         CheckRobotMass();
         return *this;
     }
 
-    DriveTrainSimulationConfig& DriveTrainSimulationConfig::WithBumperSize(units::meter_t bumperLengthX, units::meter_t bumperWidthY) {
+    DriveTrainSimulationConfig& DriveTrainSimulationConfig::WithBumperSize(wpi::units::meter_t bumperLengthX, wpi::units::meter_t bumperWidthY) {
         this->bumperLengthX = bumperLengthX;
         this->bumperWidthY = bumperWidthY;
         CheckBumperSize();
         return *this;
     }
 
-    DriveTrainSimulationConfig& DriveTrainSimulationConfig::WithTrackLengthTrackWidth(units::meter_t trackLengthX, units::meter_t trackWidthY) {
+    DriveTrainSimulationConfig& DriveTrainSimulationConfig::WithTrackLengthTrackWidth(wpi::units::meter_t trackLengthX, wpi::units::meter_t trackWidthY) {
         BoundingCheck::Check(trackLengthX.value(), 0.2, 1.5, "track length", "meters");
         BoundingCheck::Check(trackWidthY.value(), 0.2, 1.5, "track width", "meters");
-        moduleTranslations = {frc::Translation2d{trackLengthX / 2, trackWidthY / 2}, frc::Translation2d{trackLengthX / 2, -trackWidthY / 2},
-                              frc::Translation2d{-trackLengthX / 2, trackWidthY / 2}, frc::Translation2d{-trackLengthX / 2, -trackWidthY / 2}};
+        moduleTranslations = {wpi::math::Translation2d{trackLengthX / 2, trackWidthY / 2}, wpi::math::Translation2d{trackLengthX / 2, -trackWidthY / 2},
+                              wpi::math::Translation2d{-trackLengthX / 2, trackWidthY / 2}, wpi::math::Translation2d{-trackLengthX / 2, -trackWidthY / 2}};
         return *this;
     }
 
     DriveTrainSimulationConfig&
-    DriveTrainSimulationConfig::WithCustomModuleTranslations(const std::array<frc::Translation2d, kSwerveModuleCount>& moduleTranslations) {
+    DriveTrainSimulationConfig::WithCustomModuleTranslations(const std::array<wpi::math::Translation2d, kSwerveModuleCount>& moduleTranslations) {
         this->moduleTranslations = moduleTranslations;
         CheckModuleTranslations();
         return *this;
@@ -99,20 +101,20 @@ namespace maplesim::simulation::drivesims::configs {
         return robotMass / (bumperLengthX * bumperWidthY);
     }
 
-    units::meter_t DriveTrainSimulationConfig::TrackLengthX() const {
+    wpi::units::meter_t DriveTrainSimulationConfig::TrackLengthX() const {
         const auto [minModule, maxModule] =
-            std::ranges::minmax_element(moduleTranslations, [](const frc::Translation2d& a, const frc::Translation2d& b) { return a.X() < b.X(); });
+            std::ranges::minmax_element(moduleTranslations, [](const wpi::math::Translation2d& a, const wpi::math::Translation2d& b) { return a.X() < b.X(); });
         return maxModule->X() - minModule->X();
     }
 
-    units::meter_t DriveTrainSimulationConfig::TrackWidthY() const {
+    wpi::units::meter_t DriveTrainSimulationConfig::TrackWidthY() const {
         const auto [minModule, maxModule] =
-            std::ranges::minmax_element(moduleTranslations, [](const frc::Translation2d& a, const frc::Translation2d& b) { return a.Y() < b.Y(); });
+            std::ranges::minmax_element(moduleTranslations, [](const wpi::math::Translation2d& a, const wpi::math::Translation2d& b) { return a.Y() < b.Y(); });
         return maxModule->Y() - minModule->Y();
     }
 
-    units::meter_t DriveTrainSimulationConfig::DriveBaseRadius() const {
-        return units::math::hypot(TrackLengthX() / 2, TrackWidthY() / 2);
+    wpi::units::meter_t DriveTrainSimulationConfig::DriveBaseRadius() const {
+        return wpi::units::math::hypot(TrackLengthX() / 2, TrackWidthY() / 2);
     }
 
     void DriveTrainSimulationConfig::CheckRobotMass() const {

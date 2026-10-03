@@ -1,11 +1,15 @@
 plugins {
     id 'cpp'
-    id 'edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin' version '2025.0'
-    id 'edu.wpi.first.NativeUtils' version '2026.0.1'
-    id 'edu.wpi.first.GradleVsCode' version '2.1.0'
+    id 'google-test-test-suite'
+    id 'org.wpilib.WPILibRepositoriesPlugin' version '2027.0.0'
+    id 'org.wpilib.NativeUtils' version '2027.14.3'
+    id 'org.wpilib.GradleVsCode' version '2027.0.0'
 }
 
-ext.wpilibVersion = '2026.2.1'
+ext.wpilibVersion = '2027.0.0-alpha-7'
+def hostOsName = System.getProperty('os.name')
+def hostPlatformName = hostOsName.startsWith('Mac') ? 'osxuniversal' : hostOsName.startsWith('Windows') ? 'windowsx86-64' : 'linuxx86-64'
+def cppStandardArgument = hostOsName.startsWith('Windows') ? '/std:c++23preview' : '-std=c++23'
 def supportsPrecompiledHeaders =
     !System.getProperty('os.name').startsWith('Mac') &&
     !System.getProperty('os.name').startsWith('Windows')
@@ -52,10 +56,34 @@ model {
             }
 
             binaries.all {
-                cppCompiler.args '-std=c++20'
+                cppCompiler.args cppStandardArgument
             }
 
             nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+        }
+    }
+
+    testSuites {
+        MapleSimCppTest(GoogleTestTestSuiteSpec) {
+            testing $.components.MapleSimCpp
+
+            sources.cpp {
+                source {
+                    srcDir 'src/test/native/cpp'
+                    include '**/*.cpp'
+                }
+            }
+
+            binaries.all {
+                cppCompiler.args cppStandardArgument
+                lib library: 'MapleSimCpp', linkage: 'static'
+                if (targetPlatform.name != hostPlatformName) {
+                    buildable = false
+                }
+            }
+
+            nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+            nativeUtils.useRequiredLibrary(it, 'googletest_static')
         }
     }
 }
@@ -63,5 +91,5 @@ model {
 apply from: 'publish.gradle'
 
 wrapper {
-    gradleVersion = '8.14.3'
+    gradleVersion = '9.4.1'
 }

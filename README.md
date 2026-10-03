@@ -1,6 +1,6 @@
 # MapleSim C++
 
-An unofficial native C++ port of [MapleSim](https://github.com/Shenzhen-Robotics-Alliance/maple-sim) for WPILib robot simulation. It uses Box2D 2.4.2 and packages the library as a GradleRIO C++ vendordep.
+An unofficial native C++ port of [MapleSim](https://github.com/Shenzhen-Robotics-Alliance/maple-sim) for WPILib 2027.0.0-alpha-7 robot simulation. It uses Box2D 2.4.2 and packages the library as a GradleRIO C++ vendordep.
 
 This is a personal project. It is not affiliated with or endorsed by Shenzhen Robotics Alliance, Iron Maple or my team (254).
 
@@ -19,10 +19,10 @@ This is a personal project. It is not affiliated with or endorsed by Shenzhen Ro
 
 ### Build and publish
 
-Clone the repository with its Box2D submodule and run the release build:
+Use Java 25 and clone the `2027` branch with its Box2D submodule:
 
 ```bash
-git clone --recurse-submodules https://github.com/thanewye/maple-sim-cpp.git
+git clone --branch 2027 --recurse-submodules https://github.com/thanewye/maple-sim-cpp.git
 cd maple-sim-cpp
 ./gradlew build -PreleaseMode
 ```
@@ -31,10 +31,10 @@ Create the Maven repository and expanded vendordep JSON with the final version, 
 
 ```bash
 ./gradlew clean build publish -PreleaseMode \
-  -PpublishVersion=0.1.0 \
+  -PpublishVersion=0.2.0-alpha-1 \
   -PpublishGroup=com.example.maplesim \
   -PvendordepMavenUrl=https://example.github.io/maple-sim-cpp/maven \
-  -PvendordepJsonUrl=https://example.github.io/maple-sim-cpp/MapleSimCpp.json
+  -PvendordepJsonUrl=https://example.github.io/maple-sim-cpp/MapleSimCpp-2027.json
 ```
 
 The Maven repository is written to `build/repos/releases`, and the generated vendordep is written to `build/vendordep/MapleSimCpp.json`. Replace the example coordinates and URLs before publishing. See [PUBLISHING.md](PUBLISHING.md) for the complete release process.
@@ -46,7 +46,7 @@ The arena owns the simulations registered with it and advances them from `Simula
 ```cpp
 #include <memory>
 
-#include <frc/geometry/Pose2d.h>
+#include <wpi/math/geometry/Pose2d.hpp>
 
 #include "maplesim/simulation/SimulatedArena.h"
 #include "maplesim/simulation/drivesims/SwerveDriveSimulation.h"
@@ -57,12 +57,23 @@ namespace drivesims = simulation::drivesims;
 
 auto& arena = simulation::SimulatedArena::GetInstance();
 auto& drive = arena.AddDriveTrainSimulation(std::make_unique<drivesims::SwerveDriveSimulation>(
-    drivesims::configs::DriveTrainSimulationConfig::Default(), frc::Pose2d{}));
+    drivesims::configs::DriveTrainSimulationConfig::Default(), wpi::math::Pose2d{}));
 
 arena.SimulationPeriodic();
 ```
 
 A robot project still needs to connect the simulated modules and gyro to its hardware abstraction layer.
+
+## Migrating from 2026
+
+- Install WPILib 2027 alpha 7 and use Java 25. This branch uses Gradle 9.4.1 and C++23.
+- Once published, install `https://thanewye.github.io/maple-sim-cpp/MapleSimCpp-2027.json`. The 2026 vendordep remains at `MapleSimCpp.json`.
+- Replace WPILib `.h` includes with the 2027 `.hpp` paths. Geometry, controllers, kinematics and motor models now use `wpi::math`; units use `wpi::units` and NetworkTables uses `wpi::nt`.
+- Public APIs now take `wpi::math::ChassisVelocities`, `wpi::math::SwerveModuleVelocity` and `wpi::Alliance`. MapleSim method names such as `RunChassisSpeeds` are retained.
+- Systemcore replaces roboRIO and Windows ARM64 replaces Linux ARM32. Linux ARM64, Linux x86-64, Windows x86-64 and macOS universal remain supported.
+- The REBUILT arena still models the 2026 game. WPILib's season and the simulated game's season are independent.
+
+`./gradlew build -PreleaseMode` runs the native simulation tests on the desktop host. Cross targets are compile validation only.
 
 ## Documentation
 

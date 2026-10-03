@@ -9,11 +9,10 @@
 #include <iterator>
 #include <string_view>
 
-#include <frc/Errors.h>
-#include <frc/RobotBase.h>
-#include <frc/TimedRobot.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <networktables/NetworkTableInstance.h>
+#include <wpi/framework/RobotBase.hpp>
+#include <wpi/framework/TimedRobot.hpp>
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/system/Errors.hpp>
 
 #include "maplesim/physics/Fixture.h"
 #include "maplesim/simulation/IntakeSimulation.h"
@@ -26,7 +25,7 @@ namespace maplesim::simulation {
 
         struct SimulationTimings {
             int simulationSubTicksIn1Period = kDefaultSimulationSubTicksIn1Period;
-            units::second_t simulationDt = frc::TimedRobot::kDefaultPeriod / kDefaultSimulationSubTicksIn1Period;
+            wpi::units::second_t simulationDt = wpi::TimedRobot::DEFAULT_PERIOD / kDefaultSimulationSubTicksIn1Period;
         };
 
         [[nodiscard]] SimulationTimings& GetSimulationTimings() {
@@ -50,21 +49,21 @@ namespace maplesim::simulation {
         }
 
         struct ResetFieldTopic {
-            nt::BooleanPublisher publisher;
-            nt::BooleanSubscriber subscriber;
+            wpi::nt::BooleanPublisher publisher;
+            wpi::nt::BooleanSubscriber subscriber;
         };
 
         [[nodiscard]] ResetFieldTopic& GetResetFieldTopic() {
             static ResetFieldTopic* const topic = [] {
-                nt::BooleanTopic booleanTopic =
-                    nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData")->GetBooleanTopic("Reset Field");
+                wpi::nt::BooleanTopic booleanTopic =
+                    wpi::nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData")->GetBooleanTopic("Reset Field");
                 return new ResetFieldTopic{booleanTopic.Publish(), booleanTopic.Subscribe(false)};
             }();
             return *topic;
         }
 
         [[noreturn]] void FailOverrideInstance(std::string_view message) {
-            FRC_ReportError(frc::err::Error, "[MapleSim] {}", message);
+            WPILIB_ReportError(wpi::err::Error, "[MapleSim] {}", message);
             std::fprintf(stderr, "[MapleSim] %.*s\n", static_cast<int>(message.size()), message.data());
             std::fflush(stderr);
             std::abort();
@@ -72,9 +71,9 @@ namespace maplesim::simulation {
     } // namespace
 
     SimulatedArena& SimulatedArena::GetInstance() {
-        if (frc::RobotBase::IsReal() && !allowCreationOnRealRobot)
-            throw FRC_MakeError(frc::err::Error, "MapleSim is running on a real robot! (If you would actually want that, set "
-                                                 "SimulatedArena::allowCreationOnRealRobot to true).");
+        if (wpi::RobotBase::IsReal() && !allowCreationOnRealRobot)
+            throw WPILIB_MakeError(wpi::err::Error, "MapleSim is running on a real robot! (If you would actually want that, set "
+                                                    "SimulatedArena::allowCreationOnRealRobot to true).");
 
         SimulatedArena*& instance = GetInstanceSlot();
         if (instance == nullptr) instance = new seasonspecific::rebuilt2026::Arena2026Rebuilt();
@@ -99,29 +98,29 @@ namespace maplesim::simulation {
         return GetSimulationTimings().simulationSubTicksIn1Period;
     }
 
-    units::second_t SimulatedArena::GetSimulationDt() {
+    wpi::units::second_t SimulatedArena::GetSimulationDt() {
         return GetSimulationTimings().simulationDt;
     }
 
-    void SimulatedArena::OverrideSimulationTimings(units::second_t robotPeriod, int simulationSubTicksPerPeriod) {
+    void SimulatedArena::OverrideSimulationTimings(wpi::units::second_t robotPeriod, int simulationSubTicksPerPeriod) {
         std::scoped_lock lock{GetOverrideTimingsMutex()};
         SimulationTimings& timings = GetSimulationTimings();
         timings.simulationSubTicksIn1Period = simulationSubTicksPerPeriod;
         timings.simulationDt = robotPeriod / timings.simulationSubTicksIn1Period;
     }
 
-    nt::BooleanPublisher& SimulatedArena::GetResetFieldPublisher() {
+    wpi::nt::BooleanPublisher& SimulatedArena::GetResetFieldPublisher() {
         return GetResetFieldTopic().publisher;
     }
 
-    nt::BooleanSubscriber& SimulatedArena::GetResetFieldSubscriber() {
+    wpi::nt::BooleanSubscriber& SimulatedArena::GetResetFieldSubscriber() {
         return GetResetFieldTopic().subscriber;
     }
 
     SimulatedArena::SimulatedArena(FieldMap&& obstaclesMap)
-        : redTable(nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData/Breakdown/Red Alliance"))
-        , blueTable(nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData/Breakdown/blue Alliance"))
-        , genericInfoTable(nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData/Breakdown"))
+        : redTable(wpi::nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData/Breakdown/Red Alliance"))
+        , blueTable(wpi::nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData/Breakdown/blue Alliance"))
+        , genericInfoTable(wpi::nt::NetworkTableInstance::GetDefault().GetTable("SmartDashboard/MapleSim/MatchData/Breakdown"))
         , matchClockPublisher(genericInfoTable->GetDoubleTopic("Match Clock").Publish())
         , obstacles_(std::move(obstaclesMap.obstacles_)) {
         for (const std::unique_ptr<physics::Body>& obstacle : obstacles_)
@@ -139,14 +138,14 @@ namespace maplesim::simulation {
         return isBlue ? blueScore_ : redScore_;
     }
 
-    int SimulatedArena::GetScore(frc::DriverStation::Alliance allianceColor) const {
-        return GetScore(allianceColor == frc::DriverStation::Alliance::kBlue);
+    int SimulatedArena::GetScore(wpi::Alliance allianceColor) const {
+        return GetScore(allianceColor == wpi::Alliance::BLUE);
     }
 
     void SimulatedArena::AddToScore(bool isBlue, int toAdd) {
         if (isBlue) blueScore_ += toAdd;
         else redScore_ += toAdd;
-        AddValueToMatchBreakdown(isBlue, frc::DriverStation::IsAutonomous() ? "Auto/AutoScore" : "TeleopScore", toAdd);
+        AddValueToMatchBreakdown(isBlue, wpi::RobotState::IsAutonomous() ? "Auto/AutoScore" : "TeleopScore", toAdd);
     }
 
     IntakeSimulation& SimulatedArena::AddIntakeSimulation(std::unique_ptr<IntakeSimulation> intakeSimulation) {
@@ -266,8 +265,9 @@ namespace maplesim::simulation {
         for (int i = 0; i < GetSimulationSubTicksIn1Period(); i++)
             SimulationSubTick(i);
 
-        frc::SmartDashboard::PutNumber("MapleArenaSimulation/Dyn4jEngineCPUTimeMS",
-                                       std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
+        wpi::nt::NetworkTableInstance::GetDefault()
+            .GetTable("SmartDashboard")
+            ->PutNumber("MapleArenaSimulation/Dyn4jEngineCPUTimeMS", std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
 
         if (GetResetFieldSubscriber().Get()) {
             ResetFieldForAuto();
@@ -316,15 +316,15 @@ namespace maplesim::simulation {
         return returnList;
     }
 
-    std::vector<frc::Pose3d> SimulatedArena::GetGamePiecesPosesByType(const std::string& type) const {
+    std::vector<wpi::math::Pose3d> SimulatedArena::GetGamePiecesPosesByType(const std::string& type) const {
         std::scoped_lock lock{mutex_};
-        std::vector<frc::Pose3d> gamePiecesPoses;
+        std::vector<wpi::math::Pose3d> gamePiecesPoses;
         for (const std::unique_ptr<gamepieces::GamePiece>& gamePiece : gamePieces_)
             if (gamePiece->GetType() == type) gamePiecesPoses.push_back(gamePiece->GetPose3d());
         return gamePiecesPoses;
     }
 
-    std::vector<frc::Pose3d> SimulatedArena::GetGamePiecesArrayByType(const std::string& type) const {
+    std::vector<wpi::math::Pose3d> SimulatedArena::GetGamePiecesArrayByType(const std::string& type) const {
         return GetGamePiecesPosesByType(type);
     }
 
@@ -343,15 +343,15 @@ namespace maplesim::simulation {
         PlaceGamePiecesOnField();
     }
 
-    void SimulatedArena::FieldMap::AddBorderLine(const frc::Translation2d& startingPoint, const frc::Translation2d& endingPoint) {
-        AddCustomObstacle(physics::Shape::Segment(startingPoint, endingPoint), frc::Pose2d{});
+    void SimulatedArena::FieldMap::AddBorderLine(const wpi::math::Translation2d& startingPoint, const wpi::math::Translation2d& endingPoint) {
+        AddCustomObstacle(physics::Shape::Segment(startingPoint, endingPoint), wpi::math::Pose2d{});
     }
 
-    void SimulatedArena::FieldMap::AddRectangularObstacle(double width, double height, const frc::Pose2d& absolutePositionOnField) {
-        AddCustomObstacle(physics::Shape::Rectangle(units::meter_t{width}, units::meter_t{height}), absolutePositionOnField);
+    void SimulatedArena::FieldMap::AddRectangularObstacle(double width, double height, const wpi::math::Pose2d& absolutePositionOnField) {
+        AddCustomObstacle(physics::Shape::Rectangle(wpi::units::meter_t{width}, wpi::units::meter_t{height}), absolutePositionOnField);
     }
 
-    void SimulatedArena::FieldMap::AddCustomObstacle(physics::Shape shape, const frc::Pose2d& absolutePositionOnField) {
+    void SimulatedArena::FieldMap::AddCustomObstacle(physics::Shape shape, const wpi::math::Pose2d& absolutePositionOnField) {
         std::unique_ptr<physics::Body> obstacle = CreateObstacle(std::move(shape));
         obstacle->SetPose(absolutePositionOnField);
         obstacles_.push_back(std::move(obstacle));

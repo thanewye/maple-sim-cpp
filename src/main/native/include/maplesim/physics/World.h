@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include <units/time.h>
+#include <wpi/units/time.hpp>
 
 #include "maplesim/physics/Body.h"
 #include "maplesim/physics/Fixture.h"
@@ -66,7 +66,7 @@ namespace maplesim::physics {
         World(const World&) = delete;
         World& operator=(const World&) = delete;
 
-        void Step(units::second_t dt);
+        void Step(wpi::units::second_t dt);
 
         void AddBody(Body& body);
         void RemoveBody(Body& body);

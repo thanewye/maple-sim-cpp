@@ -8,7 +8,7 @@
 #include "maplesim/physics/Shape.h"
 
 namespace maplesim::simulation::drivesims {
-    AbstractDriveTrainSimulation::AbstractDriveTrainSimulation(configs::DriveTrainSimulationConfig config, const frc::Pose2d& initialPoseOnField)
+    AbstractDriveTrainSimulation::AbstractDriveTrainSimulation(configs::DriveTrainSimulationConfig config, const wpi::math::Pose2d& initialPoseOnField)
         : config(std::move(config)) {
         physics::FixtureMaterial bumperMaterial;
         bumperMaterial.friction = kBumperCoefficientOfFriction;
@@ -21,16 +21,16 @@ namespace maplesim::simulation::drivesims {
         SetSimulationWorldPose(initialPoseOnField);
     }
 
-    void AbstractDriveTrainSimulation::SetSimulationWorldPose(const frc::Pose2d& robotPose) {
+    void AbstractDriveTrainSimulation::SetSimulationWorldPose(const wpi::math::Pose2d& robotPose) {
         SetPose(robotPose);
         SetLinearVelocity(physics::LinearVelocity2d{});
     }
 
-    void AbstractDriveTrainSimulation::SetRobotSpeeds(const frc::ChassisSpeeds& givenSpeeds) {
+    void AbstractDriveTrainSimulation::SetRobotSpeeds(const wpi::math::ChassisVelocities& givenSpeeds) {
         SetVelocity(givenSpeeds);
     }
 
-    frc::ChassisSpeeds AbstractDriveTrainSimulation::GetDriveTrainSimulatedChassisSpeedsRobotRelative() const {
-        return frc::ChassisSpeeds::FromFieldRelativeSpeeds(GetDriveTrainSimulatedChassisSpeedsFieldRelative(), GetSimulatedDriveTrainPose().Rotation());
+    wpi::math::ChassisVelocities AbstractDriveTrainSimulation::GetDriveTrainSimulatedChassisSpeedsRobotRelative() const {
+        return GetDriveTrainSimulatedChassisSpeedsFieldRelative().ToRobotRelative(GetSimulatedDriveTrainPose().Rotation());
     }
 } // namespace maplesim::simulation::drivesims
